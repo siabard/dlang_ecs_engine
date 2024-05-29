@@ -3,6 +3,10 @@
 		"Yeonho Jang"
 	],
 	"copyright": "Copyright © 2024, Yeonho Jang",
+	"dependencies": {
+		"bindbc-imgui": "~>0.7.0",
+		"bindbc-sdl": "~>1.4.2"
+	},
 	"description": "D로 만드는 ECS 게임엔진",
 	"license": "MIT",
 	"name": "dlang_ecs_engine"

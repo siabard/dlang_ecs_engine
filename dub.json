@@ -1,0 +1,9 @@
+{
+	"authors": [
+		"Yeonho Jang"
+	],
+	"copyright": "Copyright © 2024, Yeonho Jang",
+	"description": "D로 만드는 ECS 게임엔진",
+	"license": "MIT",
+	"name": "dlang_ecs_engine"
+}

@@ -1,0 +1,14 @@
+{
+	"fileVersion": 1,
+	"versions": {
+		"bindbc-common": "0.1.6",
+		"bindbc-imgui": "0.7.0",
+		"bindbc-loader": "1.1.5",
+		"bindbc-opengl": "0.13.0",
+		"bindbc-sdl": "1.4.7",
+		"d_imgui": "1.89.7",
+		"d_snprintf": "1.2.1",
+		"derelict-imgui": "0.10.0",
+		"derelict-util": "2.0.6"
+	}
+}

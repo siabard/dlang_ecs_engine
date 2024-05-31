@@ -10,9 +10,11 @@
 # Compiled Static libraries
 *.a
 *.lib
+*.dylib
 
 # Executables
 *.exe
+bin/
 
 # DUB
 .dub

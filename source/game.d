@@ -7,14 +7,29 @@ import loader = bindbc.loader.sharedlib;
 
 import scene;
 
+
+/*
+  Game은 SDL2 윈도를 책임지는 메인 프레임워크이다.
+  sdl_available : SDL 이 사용가능한지 알려주는 플래그
+  scene : 장면 객체
+  window: SDL_Window 객체의 포인터 
+  renderer: window의 렌더러 객체 포인터 
+
+ */
 class Game {
   
   bool sdl_available;
   Scene scene;
 
+  SDL_Window* window;
+  SDL_Renderer* renderer;
+
+  bool ended;
+
   this() {
     this.scene = new Scene();
     this.sdl_available = false;
+    this.ended = false;
   }
 
   bool game_init() {
@@ -51,6 +66,27 @@ class Game {
     this.sdl_available = true;
     if(this.sdl_available) {
       SDL_Init(SDL_INIT_VIDEO);
+
+      this.window = 
+	SDL_CreateWindow(
+			 "SDL2 D Game Engine", 
+			 SDL_WINDOWPOS_UNDEFINED, 
+			 SDL_WINDOWPOS_UNDEFINED, 
+			 640, 480, 0);
+      if(!this.window) {
+	writeln("GAME::GAME_INIT::Cannot make Window");
+	this.sdl_available = false;
+      } else {
+	this.renderer = 
+	  SDL_CreateRenderer(
+			     this.window, -1, 
+			     SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	if(!this.renderer) {
+	  writeln("Game::GAME_INIT::Cannot make Renderer");
+	  this.sdl_available = false;
+	}
+      }
+
     }
 
 
@@ -61,12 +97,53 @@ class Game {
 
   void game_quit() {
     if(this.sdl_available) {
+      if(this.renderer) {
+
+	SDL_DestroyRenderer(this.renderer);
+      }
+
+      if(this.window) {
+	SDL_DestroyWindow(this.window);
+      }
+      
       SDL_Quit();
     }
   }
 
+
+  void event_loop() {
+    SDL_Event event;
+    while(SDL_PollEvent(&event)) {
+      switch(event.type) {
+      case SDL_QUIT:
+	this.ended = true;
+	break;
+      default:
+	// do nothing
+	break;
+      }
+    }
+  }
+
+  void game_run() {
+    while(!this.ended) {
+      this.event_loop();
+
+      this.update();
+      this.render();
+      SDL_Delay(1000 / 30); // 30 FPS
+    }
+  }
+
+  void update() {}
   void render() {
-    this.scene.show_configs();
+    // clear screen
+    SDL_SetRenderDrawColor(this.renderer, 0x00, 0xc0, 0xc0, 0xff);
+    SDL_RenderClear(this.renderer);
+
+
+    // draw screen
+    SDL_RenderPresent(renderer);
   }
 
 }

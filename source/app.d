@@ -7,7 +7,7 @@ void main()
 
   game.game_init();
 
-  game.render();
+  game.game_run();
 
   game.game_quit();
 }

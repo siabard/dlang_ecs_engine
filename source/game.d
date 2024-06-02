@@ -5,6 +5,8 @@ import std.string;
 import bindbc.sdl;
 import loader = bindbc.loader.sharedlib;
 
+import constants;
+
 import scene;
 
 
@@ -25,6 +27,10 @@ class Game {
   SDL_Renderer* renderer;
 
   bool ended;
+  
+  uint current_time;
+  uint last_time;
+
 
   this() {
     this.scene = new Scene();
@@ -33,6 +39,8 @@ class Game {
   }
 
   bool game_init() {
+
+    
     SDLSupport ret = loadSDL();
     if(ret != sdlSupport) {
       /* 
@@ -72,7 +80,7 @@ class Game {
 			 "SDL2 D Game Engine", 
 			 SDL_WINDOWPOS_UNDEFINED, 
 			 SDL_WINDOWPOS_UNDEFINED, 
-			 640, 480, 0);
+			 GAME_WIDTH, GAME_HEIGHT, 0);
       if(!this.window) {
 	writeln("GAME::GAME_INIT::Cannot make Window");
 	this.sdl_available = false;
@@ -126,16 +134,28 @@ class Game {
   }
 
   void game_run() {
+    this.last_time = SDL_GetTicks();
+
     while(!this.ended) {
+      this.current_time = SDL_GetTicks();
+      float dt = cast(float)(this.last_time - this.current_time) / 1000.0;
       this.event_loop();
 
-      this.update();
+      this.update(dt);
       this.render();
       SDL_Delay(1000 / 30); // 30 FPS
+      this.last_time = this.current_time;
     }
   }
 
-  void update() {}
+  void update(float dt) {
+    // 경과된 Tick을 계산한다.
+    this.scene.update(dt);
+    
+  }
+
+
+
   void render() {
     // clear screen
     SDL_SetRenderDrawColor(this.renderer, 0x00, 0xc0, 0xc0, 0xff);

@@ -1,15 +1,22 @@
 import std.stdio;
 import std.string;
 import std.conv;
+import std.algorithm;
 
 import config: WindowConfig, FontConfig;
 import shape: Rectangle, Circle, Shape;
+import types: Rect;
+
+import constants;
+import game;
+
+import bindbc.sdl;
 
 class Scene {
   Shape[] shapes;
   WindowConfig wc;
   FontConfig fc;
-
+    
   this() {
     this.wc = new WindowConfig();
     this.fc = new FontConfig();
@@ -76,6 +83,7 @@ class Scene {
 
       }
     }
+
   }
 
   void show_configs() {
@@ -89,6 +97,21 @@ class Scene {
       } else if(typeid(shape) == typeid(Circle)) {
 	writeln("Circle name -> ", (cast(Circle)shape).name);
       }
+    }
+  }
+
+  void update(float dt) {
+    foreach(shape; this.shapes) {
+      
+      shape.update(dt);
+    }
+    
+    
+  }
+
+  void render(SDL_Renderer *renderer) {
+    foreach(shape; this.shapes) {
+      shape.render(renderer);
     }
   }
 }

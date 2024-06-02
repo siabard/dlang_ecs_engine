@@ -1,4 +1,19 @@
-class Shape {}
+import types: Rect;
+import constants;
+
+import std.algorithm;
+import bindbc.sdl;
+
+class Shape {
+  
+  Rect get_local_bound() {
+    return new Rect();
+  }
+
+  void update(float dt) {}
+
+  void render(SDL_Renderer* renderer) {}
+}
 
 
 /*
@@ -29,6 +44,32 @@ class Circle: Shape {
     this.b = b;
     this.radius = radius;
   }
+
+  override Rect get_local_bound() {
+    int px = this.x - this.radius;
+    int py = this.y - this.radius;
+
+    return new Rect(px, py, radius * 2, radius * 2);
+  }
+
+
+  override void update(float dt) {
+    Rect bound_rect = this.get_local_bound();
+      
+    this.x += cast(int)(this.sx * dt);
+    this.y += cast(int)(this.sy * dt);
+      
+    if(bound_rect.x <= 0 || (bound_rect.x + bound_rect.w) > GAME_WIDTH) {
+      this.x = min(GAME_WIDTH, max(0, this.x));
+      this.sx *= -1;
+    }
+
+    if(bound_rect.y <= 0 || (bound_rect.y + bound_rect.h) > GAME_HEIGHT) {
+      this.y = min(GAME_HEIGHT, max(0, this.y));
+      this.sy *= -1;
+    }
+     
+  } 
 
   unittest {
     Circle c1 = new Circle("CGreen", 100, 100, -3, 2, 0, 255, 0, 50);
@@ -86,6 +127,33 @@ class Rectangle: Shape {
     this.br_y = y + (height / 2) + odd_remainder_y;
   }
 
+  override Rect get_local_bound() {
+    return new Rect(this.tl_x, this.tl_y, this.width, this.height);
+  }
+
+
+  override void update(float dt) {
+    Rect bound_rect = this.get_local_bound();
+      
+    this.x += cast(int)(this.sx * dt);
+    this.y += cast(int)(this.sy * dt);
+      
+    if(bound_rect.x <= 0 || (bound_rect.x + bound_rect.w) > GAME_WIDTH) {
+      this.x = min(GAME_WIDTH, max(0, this.x));
+      this.sx *= -1;
+    }
+
+    if(bound_rect.y <= 0 || (bound_rect.y + bound_rect.h) > GAME_HEIGHT) {
+      this.y = min(GAME_HEIGHT, max(0, this.y));
+      this.sy *= -1;
+    }
+     
+  } 
+
+  override void render(SDL_Renderer* renderer) {
+    // render
+  }
+
   unittest {
     Rectangle r1 = new Rectangle("RRed", 200, 200, 4, 4, 255, 0, 0, 50, 25);
     assert(r1.tl_x == (200 - 25));
@@ -123,4 +191,9 @@ unittest {
   assert(typeid(shapes[0]) == typeid(Rectangle));
   assert(typeid(shapes[3]) == typeid(Circle));
   
+  Rect bound_rect = shapes[0].get_local_bound();
+  Rect bound_rect_c = shapes[3].get_local_bound();
+
+  assert(bound_rect.x != 0);
+  assert(bound_rect_c.w == 100);
 }

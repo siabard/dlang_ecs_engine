@@ -12,7 +12,6 @@ class Shape {
 
   void update(float dt) {}
 
-  void render(SDL_Renderer* renderer) {}
 }
 
 
@@ -150,9 +149,6 @@ class Rectangle: Shape {
      
   } 
 
-  override void render(SDL_Renderer* renderer) {
-    // render
-  }
 
   unittest {
     Rectangle r1 = new Rectangle("RRed", 200, 200, 4, 4, 255, 0, 0, 50, 25);

@@ -12,10 +12,12 @@
     "name": "dlang_ecs_engine",
     "targetPath": "bin",
     "versions": [
-        "SDL_2010",
-        "SDL_Image_200",
-        "SDL_TTF_200",
-        "SDL_Mixer_200",
-        "SDL_Net_2012"
+        "SDL_2_30",
+        "SDL_Image_2_8",
+        "SDL_TTF_2_22",
+        "SDL_Mixer_2_8"
+    ],
+    "libs": [
+	"SDL2", "SDL2_Image", "SDL2_TTF", "SDL2_Mixer"
     ]
 }

@@ -33,7 +33,7 @@ class Game {
 
 
   this() {
-    this.scene = new Scene();
+    this.scene = new Scene(this);
     this.sdl_available = false;
     this.ended = false;
   }
@@ -97,6 +97,15 @@ class Game {
 
     }
 
+    // Image
+    //auto image_ret = loadSDLImage();
+    //writeln(image_ret);
+
+    SDLMixerSupport mixer_ret = loadSDLMixer();
+    //writeln(mixer_ret);
+
+    SDLTTFSupport ttf_ret = loadSDLTTF();
+    //writeln(ttf_ret);
 
     this.scene.scene_init();
 
@@ -162,8 +171,11 @@ class Game {
     SDL_RenderClear(this.renderer);
 
 
+
     // draw screen
-    SDL_RenderPresent(renderer);
+    this.scene.render();
+
+    SDL_RenderPresent(this.renderer);
   }
 
 }

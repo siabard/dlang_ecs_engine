@@ -16,8 +16,10 @@ class Scene {
   Shape[] shapes;
   WindowConfig wc;
   FontConfig fc;
+  Game game;
     
-  this() {
+  this(Game game) {
+    this.game = game;
     this.wc = new WindowConfig();
     this.fc = new FontConfig();
   }
@@ -109,9 +111,15 @@ class Scene {
     
   }
 
-  void render(SDL_Renderer *renderer) {
+  void render() {
     foreach(shape; this.shapes) {
-      shape.render(renderer);
+      if(typeid(shape) == typeid(Rectangle)) {
+	Rectangle rect = cast(Rectangle)shape;
+
+	int font_width = 0;
+	int font_heignt = 0;
+	
+      }
     }
   }
 }

@@ -24,3 +24,6 @@ docs/
 
 # Code coverage
 *.lst
+
+# Mac OS X
+.DS_Store

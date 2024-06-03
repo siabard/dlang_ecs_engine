@@ -5,7 +5,7 @@
     "copyright": "Copyright © 2024, Yeonho Jang",
     "dependencies": {
 	"bindbc-imgui": "~>0.7.0",
-	"bindbc-sdl": "~>1.4.7"
+	"bindbc-sdl": "~>1.4.0"
     },
     "description": "D로 만드는 ECS 게임엔진",
     "license": "MIT",
@@ -13,11 +13,11 @@
     "targetPath": "bin",
     "versions": [
         "SDL_2_30",
-        "SDL_Image_2_8",
         "SDL_TTF_2_22",
+        "SDL_Image_2_8",
         "SDL_Mixer_2_8"
     ],
     "libs": [
-	"SDL2", "SDL2_Image", "SDL2_TTF", "SDL2_Mixer"
+	"SDL2", "SDL2_TTF", "SDL2_Image", "SDL2_Mixer"
     ]
 }

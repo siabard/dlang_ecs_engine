@@ -8,7 +8,10 @@ import loader = bindbc.loader.sharedlib;
 import constants;
 
 import scene;
+import config: WindowConfig, FontConfig;
 
+import sdl_util;
+import shape;
 
 /*
   Game은 SDL2 윈도를 책임지는 메인 프레임워크이다.
@@ -31,47 +34,22 @@ class Game {
   uint current_time;
   uint last_time;
 
+  WindowConfig wc;
+  FontConfig fc;
 
   this() {
-    this.scene = new Scene(this);
+    this.wc = new WindowConfig();
+    this.fc = new FontConfig();
     this.sdl_available = false;
     this.ended = false;
+    this.scene = new Scene(this);
+
   }
 
-  bool game_init() {
+  void game_init() {
 
-    
-    SDLSupport ret = loadSDL();
-    if(ret != sdlSupport) {
-      /* 
-	 Error Handling. 
-      */
-      writeln("GAME::GAME_INIT::Cannot initialize SDL2"); 
-      foreach(info; loader.errors) {
-	writefln("%s => %s", fromStringz(info.error), fromStringz(info.message));
-      }
+    this.sdl_available = init_sdl();
 
-      string msg;
-      if(ret == SDLSupport.noLibrary) {
-	msg = ("This application requires the SDL library.");
-      } else {
-	SDL_version version_;
-	SDL_GetVersion(&version_);
-
-	msg = "SDL version is " ~
-	  to!string(version_.major) ~ "." ~
-	  to!string(version_.minor) ~ "." ~
-	  to!string(version_.patch);
-
-      }
-
-
-      writeln("GAME::GAME_INIT::" ~ msg);
-      return this.sdl_available;
-    }
-
-
-    this.sdl_available = true;
     if(this.sdl_available) {
       SDL_Init(SDL_INIT_VIDEO);
 
@@ -95,21 +73,46 @@ class Game {
 	}
       }
 
+      load_config("./assets/config.txt");
+      this.scene.scene_init();
+    }
+  }
+
+  private void load_config(string path) {
+    File file = File(path, "r");
+    scope(exit) {
+      if(file.isOpen()) {
+	file.close();
+      }
     }
 
-    // Image
-    //auto image_ret = loadSDLImage();
-    //writeln(image_ret);
+    while(!file.eof()) {
+      string line = strip(file.readln());
+      // writeln("read line -> |", line, line.length);
 
-    SDLMixerSupport mixer_ret = loadSDLMixer();
-    //writeln(mixer_ret);
+      if(line.length > 0) {
+	string[] tokens = line.split(" ");
+      
+	if(tokens[0].toLower() == "window") {
+	  int width = to!int(tokens[1]);
+	  int height = to!int(tokens[2]);
 
-    SDLTTFSupport ttf_ret = loadSDLTTF();
-    //writeln(ttf_ret);
+	  this.wc.width = width;
+	  this.wc.height = height;
+	} else if(tokens[0].toLower() == "font") {
+	
+	  this.fc.path = tokens[1];
+	  this.fc.size = to!int(tokens[2]);
+	  this.fc.r = to!int(tokens[3]);
+	  this.fc.g = to!int(tokens[4]);
+	  this.fc.b = to!int(tokens[5]);
 
-    this.scene.scene_init();
-
-    return this.sdl_available;
+	  this.fc.font =  TTF_OpenFont(("./" ~ this.fc.path).toStringz, this.fc.size);
+	  writeln("FC::FONT", this.fc.path , " --> ",  this.fc.font);
+	  writeln(TTF_GetError().fromStringz);
+	} 
+      }
+    }
   }
 
   void game_quit() {
@@ -123,6 +126,9 @@ class Game {
 	SDL_DestroyWindow(this.window);
       }
       
+      TTF_Quit();
+      Mix_Quit();
+      IMG_Quit();
       SDL_Quit();
     }
   }
@@ -147,13 +153,14 @@ class Game {
 
     while(!this.ended) {
       this.current_time = SDL_GetTicks();
-      float dt = cast(float)(this.last_time - this.current_time) / 1000.0;
+
+      float dt = cast(float)(this.current_time - this.last_time) / 1000.0;
       this.event_loop();
 
       this.update(dt);
       this.render();
-      SDL_Delay(1000 / 30); // 30 FPS
       this.last_time = this.current_time;
+      SDL_Delay(1000 / 30); // 30 FPS
     }
   }
 

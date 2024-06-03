@@ -1,5 +1,7 @@
 module config;
 
+import bindbc.sdl;
+
 /* 
    WindowConfig 는 아래의 객체이다.
    Number Number
@@ -46,6 +48,7 @@ class FontConfig {
   int r;
   int g;
   int b;
+  TTF_Font* font;
 
   this() {
     this.path = "";

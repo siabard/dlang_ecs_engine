@@ -14,14 +14,10 @@ import bindbc.sdl;
 
 class Scene {
   Shape[] shapes;
-  WindowConfig wc;
-  FontConfig fc;
   Game game;
     
   this(Game game) {
     this.game = game;
-    this.wc = new WindowConfig();
-    this.fc = new FontConfig();
   }
   
   void scene_init() {
@@ -39,20 +35,7 @@ class Scene {
       if(line.length > 0) {
 	string[] tokens = line.split(" ");
       
-	if(tokens[0].toLower() == "window") {
-	  int width = to!int(tokens[1]);
-	  int height = to!int(tokens[2]);
-
-	  this.wc.width = width;
-	  this.wc.height = height;
-	} else if(tokens[0].toLower() == "font") {
-	
-	  this.fc.path = tokens[1];
-	  this.fc.size = to!int(tokens[2]);
-	  this.fc.r = to!int(tokens[3]);
-	  this.fc.g = to!int(tokens[4]);
-	  this.fc.b = to!int(tokens[5]);
-	} else if(tokens[0].toLower() == "circle") {
+	if(tokens[0].toLower() == "circle") {
 	
 	  Circle circ = new Circle();
 	  circ.name = tokens[1];
@@ -89,10 +72,6 @@ class Scene {
   }
 
   void show_configs() {
-    
-    writeln("Window Width -> |", this.wc.width);
-    writeln("Window height -> |", this.wc.height);
-
     foreach(shape; this.shapes) {
       if(typeid(shape) == typeid(Rectangle)) {
 	writeln("Rectangle name -> ", (cast(Rectangle)shape).name);
@@ -114,11 +93,38 @@ class Scene {
   void render() {
     foreach(shape; this.shapes) {
       if(typeid(shape) == typeid(Rectangle)) {
+
 	Rectangle rect = cast(Rectangle)shape;
 
 	int font_width = 0;
-	int font_heignt = 0;
+	int font_height = 0;
 	
+	TTF_SizeText(this.game.fc.font, rect.name.toStringz, &font_width, &font_height);
+
+	// shape 의 가운데에 TTF 노출
+	int margin_left = (rect.width - font_width) / 2;
+	int margin_top = (rect.height - font_height) / 2;
+
+	SDL_Color* font_color = new SDL_Color(cast(ubyte)(rect.r), cast(ubyte)rect.g, cast(ubyte)rect.b, 255);
+	SDL_Color* bg_color = new SDL_Color(0,0,0, 255);
+	Rect bound = rect.get_local_bound();
+	SDL_Rect* dest_rect = new SDL_Rect(bound.x + margin_left, bound.y + margin_top, bound.w, bound.h);
+
+	//writeln("BOUND::", bound.x + margin_left, bound.y + margin_top);
+	//writeln("BOUND::", bound.w, bound.h);
+	SDL_Surface* font_surface = 
+	  TTF_RenderText_Shaded(
+				this.game.fc.font, 
+				rect.name.toStringz, 
+				*font_color, 
+				*bg_color);
+	SDL_Texture* text_texture = 
+	  SDL_CreateTextureFromSurface(this.game.renderer, font_surface);
+
+
+	SDL_FreeSurface(font_surface);
+
+	SDL_RenderCopy(this.game.renderer, text_texture, null, dest_rect);
       }
     }
   }

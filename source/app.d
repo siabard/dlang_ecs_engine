@@ -7,7 +7,9 @@ void main()
 
   game.game_init();
 
-  game.game_run();
+  if(game.sdl_available) {
+    game.game_run();
+  }
 
   game.game_quit();
 }

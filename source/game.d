@@ -49,6 +49,7 @@ class Game {
   void game_init() {
 
     this.sdl_available = init_sdl();
+    load_config("./assets/config.txt");
 
     if(this.sdl_available) {
       SDL_Init(SDL_INIT_VIDEO);
@@ -58,7 +59,7 @@ class Game {
 			 "SDL2 D Game Engine", 
 			 SDL_WINDOWPOS_UNDEFINED, 
 			 SDL_WINDOWPOS_UNDEFINED, 
-			 GAME_WIDTH, GAME_HEIGHT, 0);
+			 cast(int)this.wc.width, cast(int)this.wc.height, 0);
       if(!this.window) {
 	writeln("GAME::GAME_INIT::Cannot make Window");
 	this.sdl_available = false;
@@ -73,7 +74,6 @@ class Game {
 	}
       }
 
-      load_config("./assets/config.txt");
       this.scene.scene_init();
     }
   }
@@ -94,8 +94,8 @@ class Game {
 	string[] tokens = line.split(" ");
       
 	if(tokens[0].toLower() == "window") {
-	  int width = to!int(tokens[1]);
-	  int height = to!int(tokens[2]);
+	  float width = to!float(tokens[1]);
+	  float height = to!float(tokens[2]);
 
 	  this.wc.width = width;
 	  this.wc.height = height;
@@ -103,13 +103,11 @@ class Game {
 	
 	  this.fc.path = tokens[1];
 	  this.fc.size = to!int(tokens[2]);
-	  this.fc.r = to!int(tokens[3]);
-	  this.fc.g = to!int(tokens[4]);
-	  this.fc.b = to!int(tokens[5]);
+	  this.fc.r = to!ubyte(tokens[3]);
+	  this.fc.g = to!ubyte(tokens[4]);
+	  this.fc.b = to!ubyte(tokens[5]);
 
 	  this.fc.font =  TTF_OpenFont(("./" ~ this.fc.path).toStringz, this.fc.size);
-	  writeln("FC::FONT", this.fc.path , " --> ",  this.fc.font);
-	  writeln(TTF_GetError().fromStringz);
 	} 
       }
     }
@@ -154,7 +152,7 @@ class Game {
     while(!this.ended) {
       this.current_time = SDL_GetTicks();
 
-      float dt = cast(float)(this.current_time - this.last_time) / 1000.0;
+      float dt = cast(float)(this.current_time - this.last_time) / 50.0;
       this.event_loop();
 
       this.update(dt);
@@ -174,7 +172,7 @@ class Game {
 
   void render() {
     // clear screen
-    SDL_SetRenderDrawColor(this.renderer, 0x00, 0xc0, 0xc0, 0xff);
+    SDL_SetRenderDrawColor(this.renderer, 0x00, 0x00, 0x00, 0xff);
     SDL_RenderClear(this.renderer);
 
 

@@ -9,28 +9,28 @@ import bindbc.sdl;
    가로 w, 세로 h를 가지는 윈도우 객체를 표현한다.
 */
 class WindowConfig {
-  int width;
-  int height;
+  float width;
+  float height;
 
 
   this() {
-    this.width = 0;
-    this.height = 0;
+    this.width = 0.0;
+    this.height = 0.0;
   }
 
-  this(int width, int height) {
+  this(float width, float height) {
     this.width = width;
     this.height = height;
   }
 
   unittest {
     WindowConfig wc = new WindowConfig();
-    assert(wc.width == 0);
-    assert(wc.height == 0);
+    assert(wc.width == 0.0);
+    assert(wc.height == 0.0);
 
-    WindowConfig wc2 = new WindowConfig(1280, 720);
-    assert(wc2.width == 1280);
-    assert(wc2.height == 720);
+    WindowConfig wc2 = new WindowConfig(1280.0, 720.0);
+    assert(wc2.width == 1280.0);
+    assert(wc2.height == 720.0);
   }
 }
 

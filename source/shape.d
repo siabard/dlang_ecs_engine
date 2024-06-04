@@ -178,6 +178,45 @@ class Rectangle: Shape {
 }
 
 
+void render_circle(SDL_Renderer* renderer, Circle circ) {
+  int radius = cast(int)circ.radius;
+  int t1 = radius / 16;
+  int x0 = cast(int)circ.x;
+  int y0 = cast(int)circ.y;
+  
+  int x = radius;
+  int y = 0;
+  
+  SDL_SetRenderDrawColor(renderer, circ.r, circ.g, circ.b, 255);
+  
+  while(x >= y) {
+    // Pixel (x, y) and all symmetric pixels are colored (8 times)
+    /*
+    SDL_RenderDrawPoint(renderer, x0 + x, y0 + y);  
+    SDL_RenderDrawPoint(renderer, x0 + x, y0 - y);  
+    SDL_RenderDrawPoint(renderer, x0 - x, y0 + y);  
+    SDL_RenderDrawPoint(renderer, x0 - x, y0 - y);  
+    SDL_RenderDrawPoint(renderer, x0 + y, y0 + x);  
+    SDL_RenderDrawPoint(renderer, x0 + y, y0 - x);  
+    SDL_RenderDrawPoint(renderer, x0 - y, y0 + x);  
+    SDL_RenderDrawPoint(renderer, x0 - y, y0 - x);  
+    */
+    SDL_RenderDrawLine(renderer, x0 + x, y0 + y, x0 - x, y0 - y);
+    SDL_RenderDrawLine(renderer, x0 + x, y0 - y, x0 - x, y0 + y);
+    SDL_RenderDrawLine(renderer, x0 + y, y0 + x, x0 - y, y0 - x);
+    SDL_RenderDrawLine(renderer, x0 - y, y0 + x, x0 + y, y0 - x);
+
+    y = y  + 1;
+    t1 = t1 + y;
+    int t2 = t1 - x;
+    if(t2 >= 0) {
+      t1 = t2;
+      x = x - 1;
+    }
+  }
+}
+
+
 unittest {
   import std.stdio;
 

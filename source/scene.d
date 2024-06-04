@@ -4,7 +4,7 @@ import std.conv;
 import std.algorithm;
 
 import config: WindowConfig, FontConfig;
-import shape: Rectangle, Circle, Shape;
+import shape: Rectangle, Circle, Shape, render_circle;
 import types: Rect;
 
 import constants;
@@ -129,6 +129,39 @@ class Scene {
 	SDL_SetRenderDrawColor(this.game.renderer, rect.r, rect.g, rect.b, 0xff);
 	SDL_RenderFillRect(this.game.renderer, new SDL_Rect(bound.x, bound.y, bound.w, bound.h));
 	SDL_RenderCopy(this.game.renderer, text_texture, null, dest_rect);
+      } else if(typeid(shape) == typeid(Circle)) {
+	Circle circ = cast(Circle)shape;
+
+	int font_width = 0;
+	int font_height = 0;
+	
+	TTF_SizeText(this.game.fc.font, circ.name.toStringz, &font_width, &font_height);
+
+	// shape 의 가운데에 TTF 노출
+	int margin_left = (cast(int)circ.radius * 2 - font_width) / 2;
+	int margin_top = (cast(int)circ.radius * 2 - font_height) / 2;
+
+
+	SDL_Color* font_color = new SDL_Color(0,0,0, 255);
+	SDL_Color* bg_color = new SDL_Color(circ.r, circ.g, circ.b, 255);
+
+	Rect bound = circ.get_local_bound();
+	SDL_Rect* dest_rect = new SDL_Rect(bound.x + margin_left, bound.y + margin_top, font_width, font_height);
+
+	SDL_Surface* font_surface = 
+	  TTF_RenderText_Shaded(
+				this.game.fc.font, 
+				circ.name.toStringz, 
+				*font_color, 
+				*bg_color);
+	SDL_Texture* text_texture = 
+	  SDL_CreateTextureFromSurface(this.game.renderer, font_surface);
+	SDL_FreeSurface(font_surface);
+	
+	// 원 그리기 
+	render_circle(this.game.renderer, circ);
+	SDL_RenderCopy(this.game.renderer, text_texture, null, dest_rect);
+	
       }
     }
   }

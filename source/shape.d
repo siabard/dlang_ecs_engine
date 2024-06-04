@@ -24,15 +24,15 @@ class Shape {
 
 class Circle: Shape {
   string name;
-  int x, y;
-  int sx, sy;
-  int r, g, b;
-  int radius;
+  float x, y;
+  float sx, sy;
+  ubyte r, g, b;
+  float radius;
 
 
   this() {}
 
-  this(string name, int x, int y, int sx, int sy, int r, int g, int b, int radius) {
+  this(string name, float x, float y, float sx, float sy, ubyte r, ubyte g, ubyte b, float radius) {
     this.name = name;
     this.x = x;
     this.y = y;
@@ -45,29 +45,28 @@ class Circle: Shape {
   }
 
   override Rect get_local_bound() {
-    int px = this.x - this.radius;
-    int py = this.y - this.radius;
+    int px = cast(int)(this.x - this.radius);
+    int py = cast(int)(this.y - this.radius);
 
-    return new Rect(px, py, radius * 2, radius * 2);
+    return new Rect(px, py, cast(int)(radius * 2), cast(int)(radius * 2));
   }
 
 
   override void update(float dt) {
-    Rect bound_rect = this.get_local_bound();
-      
-    this.x += cast(int)(this.sx * dt);
-    this.y += cast(int)(this.sy * dt);
-      
-    if(bound_rect.x <= 0 || (bound_rect.x + bound_rect.w) > GAME_WIDTH) {
-      this.x = min(GAME_WIDTH, max(0, this.x));
+    this.x += (this.sx * dt);
+    this.y += (this.sy * dt);
+
+    Rect bound_rect = this.get_local_bound();      
+
+    if(bound_rect.x <= 0.0 || (bound_rect.x + bound_rect.w) > GAME_WIDTH) {
+      this.x = min(GAME_WIDTH, max(0.0, this.x));
       this.sx *= -1;
     }
 
-    if(bound_rect.y <= 0 || (bound_rect.y + bound_rect.h) > GAME_HEIGHT) {
-      this.y = min(GAME_HEIGHT, max(0, this.y));
+    if(bound_rect.y <= 0.0 || (bound_rect.y + bound_rect.h) > GAME_HEIGHT) {
+      this.y = min(GAME_HEIGHT, max(0.0, this.y));
       this.sy *= -1;
     }
-     
   } 
 
   unittest {
@@ -88,16 +87,16 @@ class Circle: Shape {
 
 class Rectangle: Shape {
   string name;
-  int x, y;
-  int sx, sy;
-  int r, g, b;
-  int width, height;
+  float x, y;
+  float sx, sy;
+  ubyte r, g, b;
+  float width, height;
 
   private int tl_x, tl_y, br_x, br_y;
 
   this() {}
 
-  this(string name, int x, int y, int sx, int sy, int r, int g, int b, int width, int height) {
+  this(string name, float x, float y, float sx, float sy, ubyte r, ubyte g, ubyte b, float width, float height) {
     import std.stdio;
 
     this.name = name;
@@ -116,37 +115,53 @@ class Rectangle: Shape {
     //           1 - ( 2 - 1) => 1 - 1 = 0
     // 홀수일 때 1 - (5 / 2 - ( 5 - 1 ) / 2) => 1 - (2 - 4 / 2 ) ->
     //           1 - (2 - 2) = 1
-    int odd_remainder_x = 1 - (width / 2 - ((width - 1) / 2));
-    int odd_remainder_y = 1 - (height / 2 - ((height - 1) / 2));
+    int iwidth = cast(int)width;
+    int iheight = cast(int)height;
+    int odd_remainder_x = 1 - (iwidth / 2 - ((iwidth - 1) / 2));
+    int odd_remainder_y = 1 - (iheight / 2 - ((iheight - 1) / 2));
     
-    this.tl_x = x - (width / 2);
-    this.br_x = x + (width / 2) + odd_remainder_x;
+    this.tl_x = cast(int)x - (iwidth / 2);
+    this.br_x = cast(int)x + (iwidth / 2) + odd_remainder_x;
 
-    this.tl_y = y - (height / 2);
-    this.br_y = y + (height / 2) + odd_remainder_y;
+    this.tl_y = cast(int)y - (iheight / 2);
+    this.br_y = cast(int)y + (iheight / 2) + odd_remainder_y;
   }
 
   override Rect get_local_bound() {
-    return new Rect(this.tl_x, this.tl_y, this.width, this.height);
+
+    int iwidth = cast(int)this.width;
+    int iheight = cast(int)this.height;
+    int odd_remainder_x = 1 - (iwidth / 2 - ((iwidth - 1) / 2));
+    int odd_remainder_y = 1 - (iheight / 2 - ((iheight - 1) / 2));
+    
+    this.tl_x = cast(int)this.x - (iwidth / 2);
+    this.br_x = cast(int)this.x + (iwidth / 2) + odd_remainder_x;
+
+    this.tl_y = cast(int)this.y - (iheight / 2);
+    this.br_y = cast(int)this.y + (iheight / 2) + odd_remainder_y;
+
+    return new Rect(this.tl_x, this.tl_y, cast(int)this.width, cast(int)this.height);
   }
 
 
-  override void update(float dt) {
+  override void update(float dt) {  
+    import std.stdio;
+
+    this.x += this.sx * dt;
+    this.y += this.sy * dt;
+
     Rect bound_rect = this.get_local_bound();
       
-    this.x += cast(int)(this.sx * dt);
-    this.y += cast(int)(this.sy * dt);
-      
-    if(bound_rect.x <= 0 || (bound_rect.x + bound_rect.w) > GAME_WIDTH) {
+    if(bound_rect.x < 0 || (bound_rect.x + bound_rect.w) > GAME_WIDTH) {
       this.x = min(GAME_WIDTH, max(0, this.x));
       this.sx *= -1;
     }
 
-    if(bound_rect.y <= 0 || (bound_rect.y + bound_rect.h) > GAME_HEIGHT) {
+    if(bound_rect.y < 0 || (bound_rect.y + bound_rect.h) > GAME_HEIGHT) {
       this.y = min(GAME_HEIGHT, max(0, this.y));
       this.sy *= -1;
     }
-     
+   
   } 
 
 

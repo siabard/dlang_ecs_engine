@@ -39,29 +39,29 @@ class Scene {
 	
 	  Circle circ = new Circle();
 	  circ.name = tokens[1];
-	  circ.x = to!int(tokens[2]);
-	  circ.y = to!int(tokens[3]);
-	  circ.sx = to!int(tokens[4]);
-	  circ.sy = to!int(tokens[5]);
-	  circ.r = to!int(tokens[6]);
-	  circ.g = to!int(tokens[7]);
-	  circ.b = to!int(tokens[8]);
-	  circ.radius = to!int(tokens[9]);
+	  circ.x = to!float(tokens[2]);
+	  circ.y = to!float(tokens[3]);
+	  circ.sx = to!float(tokens[4]);
+	  circ.sy = to!float(tokens[5]);
+	  circ.r = to!ubyte(tokens[6]);
+	  circ.g = to!ubyte(tokens[7]);
+	  circ.b = to!ubyte(tokens[8]);
+	  circ.radius = to!float(tokens[9]);
 
 	  this.shapes ~= circ;
 
 	} else if(tokens[0].toLower() == "rectangle") {
 	  Rectangle rect = new Rectangle();
 	  rect.name = tokens[1];
-	  rect.x = to!int(tokens[2]);
-	  rect.y = to!int(tokens[3]);
-	  rect.sx = to!int(tokens[4]);
-	  rect.sy = to!int(tokens[5]);
-	  rect.r = to!int(tokens[6]);
-	  rect.g = to!int(tokens[7]);
-	  rect.b = to!int(tokens[8]);
-	  rect.width = to!int(tokens[9]);
-	  rect.height = to!int(tokens[10]);
+	  rect.x = to!float(tokens[2]);
+	  rect.y = to!float(tokens[3]);
+	  rect.sx = to!float(tokens[4]);
+	  rect.sy = to!float(tokens[5]);
+	  rect.r = to!ubyte(tokens[6]);
+	  rect.g = to!ubyte(tokens[7]);
+	  rect.b = to!ubyte(tokens[8]);
+	  rect.width = to!float(tokens[9]);
+	  rect.height = to!float(tokens[10]);
 
 	  this.shapes ~= rect;
 	}
@@ -82,8 +82,7 @@ class Scene {
   }
 
   void update(float dt) {
-    foreach(shape; this.shapes) {
-      
+    foreach(shape; this.shapes) {   
       shape.update(dt);
     }
     
@@ -102,13 +101,14 @@ class Scene {
 	TTF_SizeText(this.game.fc.font, rect.name.toStringz, &font_width, &font_height);
 
 	// shape 의 가운데에 TTF 노출
-	int margin_left = (rect.width - font_width) / 2;
-	int margin_top = (rect.height - font_height) / 2;
+	int margin_left = (cast(int)rect.width - font_width) / 2;
+	int margin_top = (cast(int)rect.height - font_height) / 2;
 
-	SDL_Color* font_color = new SDL_Color(cast(ubyte)(rect.r), cast(ubyte)rect.g, cast(ubyte)rect.b, 255);
-	SDL_Color* bg_color = new SDL_Color(0,0,0, 255);
+	SDL_Color* font_color = new SDL_Color(0,0,0, 255);
+	SDL_Color* bg_color = new SDL_Color(rect.r, rect.g, rect.b, 255);
+
 	Rect bound = rect.get_local_bound();
-	SDL_Rect* dest_rect = new SDL_Rect(bound.x + margin_left, bound.y + margin_top, bound.w, bound.h);
+	SDL_Rect* dest_rect = new SDL_Rect(bound.x + margin_left, bound.y + margin_top, font_width, font_height);
 
 	//writeln("BOUND::", bound.x + margin_left, bound.y + margin_top);
 	//writeln("BOUND::", bound.w, bound.h);
@@ -124,6 +124,10 @@ class Scene {
 
 	SDL_FreeSurface(font_surface);
 
+
+	// 사각형 먼저 그리기
+	SDL_SetRenderDrawColor(this.game.renderer, rect.r, rect.g, rect.b, 0xff);
+	SDL_RenderFillRect(this.game.renderer, new SDL_Rect(bound.x, bound.y, bound.w, bound.h));
 	SDL_RenderCopy(this.game.renderer, text_texture, null, dest_rect);
       }
     }

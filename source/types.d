@@ -99,6 +99,16 @@ class Vec2 {
     return sqrt((this.x * this.x) + (this.y * this.y));
   }
 
+  float angle_to(const Vec2 target) const {
+    float theta = 0;
+
+    Vec2 delta = new Vec2(target.x - this.x, target.y - this.y);
+    theta = atan2(delta.y, delta.x);
+
+    return theta;
+    
+  }
+
   unittest {
 
     import std.stdio;
@@ -120,4 +130,42 @@ class Vec2 {
     assert(v5.dist(new Vec2(0, 0)) == v5.length);
     assert(v5.length() == 5);
   }
+
+  unittest {
+    import std.stdio;
+
+    writeln("Calcuate theta");
+
+    Vec2 player = new Vec2(3, 3);
+    Vec2 mouse = new Vec2(5, 1);
+    
+    float theta = player.angle_to(mouse);
+
+    writeln("theta =>", theta);
+    writeln("cos theta => ", cos(theta));
+    writeln("sin theta => ", sin(theta));
+  }
+}
+
+
+bool circle_collide(Vec2 p1, Vec2 p2, float r1, float r2) {
+  float dist_sqaure = (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y);
+  
+  return dist_sqaure < ((r1 + r2) * (r1 + r2));
+}
+
+unittest {
+  import std.stdio;
+
+  writeln("circle collisions");
+  
+  Vec2 p1 = new Vec2(2, 2);
+  Vec2 p2 = new Vec2(4, 2);
+
+  assert(circle_collide(p1, p2, 1.0, 1.0) == false);
+  assert(circle_collide(p1, p2, 1.1, 1.0) == true);
+
+  writeln("all circle test passed");
+
+  
 }

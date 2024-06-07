@@ -3,21 +3,34 @@ import std.string;
 import std.conv;
 import std.algorithm;
 
-import config: WindowConfig, FontConfig;
+import config;
 import shape: Rectangle, Circle, Shape, render_circle;
 import types: Rect;
 
 import constants;
+import entity;
 import game;
 
 import bindbc.sdl;
 
+import component;
+import types;
+
+import num_util;
+
 class Scene {
   Shape[] shapes;
   Game game;
+  EntityManager entities;
+  Entity player;
+
+  PlayerSpec ps;
+  EnemySpec es;
+  BulletSpec bs;
     
   this(Game game) {
     this.game = game;
+    this.entities = new EntityManager();
   }
   
   void scene_init() {
@@ -64,11 +77,127 @@ class Scene {
 	  rect.height = to!float(tokens[10]);
 
 	  this.shapes ~= rect;
-	}
+	} else if(tokens[0].toLower() == "player") {
+	  this.ps = new PlayerSpec();
 
+	  this.ps.sr = to!int(tokens[1]);
+	  this.ps.cr = to!int(tokens[2]);
+	  this.ps.speed = to!float(tokens[3]);
+	  this.ps.fr = to!ubyte(tokens[4]);
+	  this.ps.fg = to!ubyte(tokens[5]);
+	  this.ps.fb = to!ubyte(tokens[6]);
+	  this.ps.or = to!ubyte(tokens[7]);
+	  this.ps.og = to!ubyte(tokens[8]);
+	  this.ps.ob = to!ubyte(tokens[9]);
+	  this.ps.ot = to!ubyte(tokens[10]);
+	} else if(tokens[0].toLower() == "enemy") {
+	  this.es = new EnemySpec();
+
+	  this.es.sr = to!int(tokens[1]);
+	  this.es.cr = to!int(tokens[2]);
+	  this.es.smin = to!float(tokens[3]);
+	  this.es.smax = to!float(tokens[4]);
+	  this.es.or = to!ubyte(tokens[5]);
+	  this.es.og = to!ubyte(tokens[6]);
+	  this.es.ob = to!ubyte(tokens[7]);
+	  this.es.ot = to!int(tokens[8]);
+	  this.es.vmin = to!int(tokens[9]);
+	  this.es.vmax = to!int(tokens[10]);
+	  this.es.l = to!int(tokens[11]);
+	  this.es.sp = to!int(tokens[12]);
+
+	} else if(tokens[0].toLower() == "bullet") {
+	  this.bs = new BulletSpec();
+
+	  this.bs.sr = to!int(tokens[1]);
+	  this.bs.cr = to!int(tokens[2]);
+	  this.bs.s = to!float(tokens[3]);
+	  this.bs.fr = to!ubyte(tokens[4]);
+	  this.bs.fg = to!ubyte(tokens[5]);
+	  this.bs.fb = to!ubyte(tokens[6]);
+	  this.bs.or = to!ubyte(tokens[7]);
+	  this.bs.og = to!ubyte(tokens[8]);
+	  this.bs.ob = to!ubyte(tokens[9]);
+	  this.bs.ot = to!int(tokens[10]);
+	  this.bs.v = to!int(tokens[11]);
+	  this.bs.l = to!int(tokens[12]);
+	}
       }
     }
+  }
 
+  void spawn_player() {
+    if(this.ps !is null) {
+      auto entity = this.entities.addEntity("player");
+
+      // this.ps 에서의설정값으로Entity설정 
+      CShape shape = new CShape(
+				this.ps.sr * 2.0,
+				this.ps.sr * 2.0,
+				this.ps.fr,
+				this.ps.fg,
+				this.ps.fb,
+				this.ps.or,
+				this.ps.og,
+				this.ps.ob,
+				this.ps.ot
+				);
+
+      CTransform transform = new CTransform(
+					    new Vec2(this.game.wc.width / 2,
+						     this.game.wc.height / 2),
+					    new Vec2(0, 0)
+					    );
+      CCollision collision = new CCollision(this.ps.cr);
+
+      entity.shape = shape;
+      entity.transform = transform;
+      entity.collision = collision;
+    }
+  }
+
+  void spawn_enemy() {
+    import std.math;
+
+    if(this.es !is null) {
+      auto entity = this.entities.addEntity("enemy");
+      
+      
+      // this.es 에서의 설정을 가져옴
+      float speed = get_random(cast(int)this.es.smin, cast(int)this.es.smax);
+      float theta = get_random(0, 360) * 2.0 * PI / 180.0;
+
+      float x_span = this.game.wc.width - (this.es.sr * 2.0);
+      float y_span = this.game.wc.height = (this.es.sr * 2.0);
+
+      float x_pos = get_random(0, cast(int)x_span);
+      float y_pos = get_random(0, cast(int)y_span);
+
+      CShape shape = new CShape(
+				this.es.sr * 2.0,
+				this.es.sr * 2.0,
+				0,
+				0,
+				0,
+				this.es.or,
+				this.es.og,
+				this.es.ob,
+				this.es.ot
+				);
+
+      
+      CTransform transform = new CTransform(
+					    
+					    new Vec2(x_pos, y_pos), 
+					    new Vec2(speed * cos(theta),
+						     speed * sin(theta))
+					    );
+      CCollision collision = new CCollision(this.es.cr);
+      
+      entity.shape = shape;
+      entity.transform = transform;
+      entity.collision = collision;
+    }
   }
 
   void show_configs() {
@@ -165,4 +294,16 @@ class Scene {
       }
     }
   }
-}
+
+  // systems
+  void sMovement() {}
+
+  void sUserInput() {}
+
+  void sRender() {}
+
+  void sEnemySpawner() {}
+
+  void sCollision() {}
+
+} // End of Class Scene

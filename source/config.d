@@ -75,3 +75,125 @@ class FontConfig {
     assert(fc.b == 0);
   }
 }
+
+
+/*
+  Player Specification 은 아래의 객체이다.
+  int int float int int int int int int int int
+  new PlayerSpec(SR, CR, S, FR, FG, FB, OR, OG, OB, OT, V)
+  SR Shape Radius
+  CR Collision Radius
+  S  Speed
+  FR, FG, FB Fill Color
+  OR, OG, OB outline color
+  OT outline thickness
+  
+*/
+
+class PlayerSpec {
+  int sr;
+  int cr;
+  float speed;
+  ubyte fr, fg, fb;
+  ubyte or, og, ob;
+  int ot;
+
+  this() {}
+
+  this(int sr, int cr, float speed, ubyte fr, ubyte fg, ubyte fb, ubyte or, ubyte og, ubyte ob, int ot) {
+    this.sr = sr;
+    this.cr = cr;
+    this.speed = speed;
+    this.fr = fr;
+    this.fg = fg;
+    this.fb = fb;
+    this.or = or;
+    this.og = og;
+    this.ob = ob;
+    this.ot = ot;
+  }
+}
+
+/*
+  Enemy Specification 은 아래의 객체이다.
+  int int float float ubyteubyte ubyte int int int int int
+  SHape Radius       SR         int
+  Collision Radius   CR         int
+  Min / Max Speed    SMIN, SMAX float, float
+  Outline Color      OR, OG, OB ubyte, ubyte, ubyte
+  Outlien THickness  OT         int
+  Min / Max Vertices VMIN, VMAX int, int
+  Small Lifespan     L          int
+  Spawn Interval     SP         int
+  
+*/
+
+class EnemySpec {
+  int sr;
+  int cr;
+  float smin, smax;
+  ubyte or, og, ob;
+  int ot;
+  int vmin, vmax;
+  int l;
+  int sp;
+
+  this() {}
+
+  this(int sr, int cr, float smin, float smax, ubyte or, ubyte og, ubyte ob, int ot, int vmin, int vmax, int l, int sp) {
+    this.sr = sr;
+    this.cr = cr;
+    this.smin = smin;
+    this.smax = smax;
+    this.or = or;
+    this.ob = ob;
+    this.og = og;
+    this.ot = ot;
+    this.vmin = vmin;
+    this.vmax = vmax;
+    this.l = l;
+    this.sp = sp;
+  }
+}
+
+
+/*
+  Bullet Specification 은 다음의 객체이다.
+  Bullet SR CR S FR FG FB OR OG OB OT V L
+  Shape Radius        SR         int
+  Collision Radius    CR         int
+  Speed               S          float
+  Fill Color          FR, FG, FB ubyte, ubyte, ubyte
+  Outline Color       OR, OG, OB ubyte, ubyte, ubyte
+  Outline Thickness   OT         int
+  Shape Vertices      V          int
+  Lifespan            L          int
+*/
+
+class BulletSpec {
+  int sr, cr;
+  float s;
+  ubyte fr, fg, fb;
+  ubyte or, og, ob;
+  int ot;
+  int v;
+  int l;
+
+
+  this() {}
+
+  this(int sr, int cr, float s, ubyte fr, ubyte fg, ubyte fb, ubyte or, ubyte og, ubyte ob, int ot, int v, int l) {
+    this.sr = sr;
+    this.cr = cr;
+    this.s = s;
+    this.fr = fr;
+    this.fg = fg;
+    this.fb = fb;
+    this.or = or;
+    this.og = og;
+    this.ob = ob;
+    this.ot = ot;
+    this.v = v;
+    this.l = l;
+  }
+}

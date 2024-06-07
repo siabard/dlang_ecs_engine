@@ -112,10 +112,13 @@ class Entity {
   uint entity_id;
   bool is_alive;
 
-  CTransform transform;
-  CName name;
-  CShape shape;
-  CBBox box;
+  CTransform transform = null;
+  CName name = null;
+  CCollision collision = null;
+  CScore score = null;
+  CShape shape = null;
+  CInput input = null;
+  CLifespan lifespan;
 
   this(string tag, uint entity_id) {
     this.entity_id = entity_id;
@@ -123,8 +126,8 @@ class Entity {
     this.is_alive = true;
     this.transform = null;
     this.name = null;
-    this.shape = null;
-    this.box = null;
+    this.collision = null;
+    this.score = null;
 
   }
 

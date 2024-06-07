@@ -8,7 +8,7 @@ import loader = bindbc.loader.sharedlib;
 import constants;
 
 import scene;
-import config: WindowConfig, FontConfig;
+import config;
 
 import sdl_util;
 import shape;
@@ -30,6 +30,7 @@ class Game {
   SDL_Renderer* renderer;
 
   bool ended;
+  bool paused;
   
   uint current_time;
   uint last_time;
@@ -42,6 +43,7 @@ class Game {
     this.fc = new FontConfig();
     this.sdl_available = false;
     this.ended = false;
+    this.paused = false;
     this.scene = new Scene(this);
 
   }

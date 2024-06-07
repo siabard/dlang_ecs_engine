@@ -99,6 +99,12 @@ class Vec2 {
     return sqrt((this.x * this.x) + (this.y * this.y));
   }
 
+
+  Vec2 normalize() {
+    auto l = this.length;
+    return new Vec2(this.x / l, this.y / l); 
+  }
+  
   float angle_to(const Vec2 target) const {
     float theta = 0;
 

@@ -27,6 +27,8 @@ class Scene {
   PlayerSpec ps;
   EnemySpec es;
   BulletSpec bs;
+
+  float last_spwan_time = 0.0;
     
   this(Game game) {
     this.game = game;
@@ -90,6 +92,7 @@ class Scene {
 	  this.ps.og = to!ubyte(tokens[8]);
 	  this.ps.ob = to!ubyte(tokens[9]);
 	  this.ps.ot = to!ubyte(tokens[10]);
+
 	} else if(tokens[0].toLower() == "enemy") {
 	  this.es = new EnemySpec();
 
@@ -124,6 +127,8 @@ class Scene {
 	}
       }
     }
+
+    spawn_player();
   }
 
   void spawn_player() {
@@ -153,6 +158,8 @@ class Scene {
       entity.shape = shape;
       entity.transform = transform;
       entity.collision = collision;
+
+      this.player = entity;
     }
   }
 
@@ -168,10 +175,10 @@ class Scene {
       float theta = get_random(0, 360) * 2.0 * PI / 180.0;
 
       float x_span = this.game.wc.width - (this.es.sr * 2.0);
-      float y_span = this.game.wc.height = (this.es.sr * 2.0);
+      float y_span = this.game.wc.height - (this.es.sr * 2.0);
 
-      float x_pos = get_random(0, cast(int)x_span);
-      float y_pos = get_random(0, cast(int)y_span);
+      float x_pos = get_random(this.es.sr, cast(int)x_span);
+      float y_pos = get_random(this.es.sr, cast(int)y_span);
 
       CShape shape = new CShape(
 				this.es.sr * 2.0,
@@ -214,7 +221,12 @@ class Scene {
     foreach(shape; this.shapes) {   
       shape.update(dt);
     }
-    
+    this.entities.update();
+    sUserInput();
+    sCollision();
+    sMovement(dt);
+    sEnemySpawner(dt);
+   
     
   }
 
@@ -293,17 +305,102 @@ class Scene {
 	
       }
     }
+
+    sRender();
   }
 
   // systems
-  void sMovement() {}
+  void sMovement(float dt) {
+    Rect world_rect = new Rect(0, 0, cast(int)this.game.wc.width, cast(int)this.game.wc.height);
+    
+    foreach(entity; this.entities.getEntities()) {
+      if(entity.transform !is null && entity.shape !is null) {
+	entity.transform.pos.x = entity.transform.pos.x + entity.transform.velocity.x * dt;
+	entity.transform.pos.y = entity.transform.pos.y + entity.transform.velocity.y * dt;
+
+	// 화면 경계에서 플레이어와 다른 객체는 행동이 달라진다.
+	// 플레이어는 더 이상 움직이지 않기만 하면 되지만, 다른 객체는 반사되어야함.
+
+	Rect entity_rect = get_bound_rect(entity.transform.pos, entity.shape.width, entity.shape.height);
+	if(!world_rect.contains(entity_rect)) {
+	  if(entity.tag != "player") {
+	    if((this.game.wc.width - entity.shape.width / 2.0) <= entity.transform.pos.x ||
+	       (entity.shape.width / 2.0) >= entity.transform.pos.x) {
+	      entity.transform.velocity.x *= -1;
+	    }
+
+	    if((this.game.wc.height - entity.shape.height / 2.0) <= entity.transform.pos.y ||
+	       (entity.shape.height / 2.0 >= entity.transform.pos.y)) {
+	      entity.transform.velocity.y *= -1;
+		      
+	    }
+	  }
+	  
+	  entity.transform.pos.x = 
+	    min(cast(float)this.game.wc.width - entity.shape.width / 2.0 + 1.0, 
+		max(entity.shape.width / 2.0 - 1.0, entity.transform.pos.x));
+	  
+	  entity.transform.pos.y = 
+	    min(cast(float)this.game.wc.height - entity.shape.height / 2.0 + 1.0, 
+		max(entity.shape.height / 2.0 - 1.0, entity.transform.pos.y));
+	}
+      }
+    }
+  }
+
+  unittest {
+    import std.stdio;
+
+    writeln("movement system");
+    
+    Rect entity_rect = get_bound_rect(new Vec2(80, 80), 200, 25);
+    Rect world_rect = new Rect(0, 0, 1280, 720);
+    
+    assert(!world_rect.contains(entity_rect));
+    assert("enemy" != "player");
+    writeln(min(1280 - 100, max(100, 80)));
+    writeln("movement system end");
+  }
 
   void sUserInput() {}
 
-  void sRender() {}
+  void sRender() {
 
-  void sEnemySpawner() {}
+    // Shape 이 있는 항목에 대한 그림 그리기 (사각형)
+    foreach(entity; this.entities.getEntities()) {
+      if(entity.transform !is null && entity.shape !is null) {
+	CShape shape = entity.shape;
+	
+	Rect bound =  get_bound_rect(entity.transform.pos, entity.shape.width, entity.shape.height);
+	
 
-  void sCollision() {}
+	SDL_SetRenderDrawColor(this.game.renderer, shape.r, shape.g, shape.b, 0xff);
+	SDL_RenderFillRect(this.game.renderer, new SDL_Rect(bound.x, bound.y, bound.w, bound.h));
+	
+	// 테두리 그리기
+	SDL_SetRenderDrawColor(this.game.renderer, shape.br, shape.bg, shape.bb, 0xff);
+	SDL_RenderDrawRect(this.game.renderer, new SDL_Rect(bound.x, bound.y, bound.w, bound.h));
+      }
+    }
+  }
+
+  void sEnemySpawner(float dt) {
+    if(this.es !is null) {
+      if(this.last_spwan_time >= this.es.sp) {
+	this.spawn_enemy();
+	this.last_spwan_time = 0.0;
+      } else {
+	this.last_spwan_time += dt;
+      }
+    }
+  }
+
+  void sCollision() {
+    auto enemies = this.entities.getEntities("enemy");
+    foreach(enemy; enemies) {
+      // if collide enemy should be destroyed.
+    }
+    
+  }
 
 } // End of Class Scene

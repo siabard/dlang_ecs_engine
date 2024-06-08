@@ -15,6 +15,33 @@ class Rect {
     this.w = w;
     this.h = h;
   }
+
+  bool contains(const Rect rhs) const {
+    return this.x <= rhs.x 
+      && this.y <= rhs.y 
+      && (this.x + this.w) >= (rhs.x + rhs.w) 
+      && (this.y + this.h) >= (rhs.y + rhs.h);
+  }
+
+  bool is_inside_of(const Rect rhs) const {
+    return rhs.x <= this.x 
+      && rhs.y <= this.y 
+      && (rhs.x + rhs.w) >= (this.x + this.w) 
+      && (rhs.y + rhs.h) >= (this.y + this.h);
+  }
+}
+
+unittest {
+  import std.stdio;
+  writeln("RECT");
+
+  Rect outer = new Rect(0, 0, 100, 100);
+  Rect inner = new Rect(-10, 0, 90, 90);
+
+  assert(!outer.contains(inner) == true);
+  
+  writeln("outerrrr :", outer.x, outer.y, outer.w, outer.h);
+  writeln("RECT END");
 }
 
 /*
@@ -82,6 +109,8 @@ class Vec2 {
     this.x += rhs.x;
     this.y += rhs.y;
   }
+
+
 
   void scale(float s) {
     this.x *= s;

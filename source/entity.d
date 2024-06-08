@@ -6,6 +6,7 @@ import std.array;
 import std.algorithm.mutation;
 
 import types;
+import shape;
 
 alias EntityVec = Entity[];
 alias EntityMap = EntityVec[string];
@@ -134,5 +135,14 @@ class Entity {
   void destroy() {
     this.is_alive = false;
   }
-
 }
+
+Rect get_bound_rect(Vec2 pos, float width, float height) {
+  return new Rect(
+		  cast(int)(pos.x - width / 2.0),
+		  cast(int)(pos.y - height / 2.0),
+		  cast(int)width,
+		  cast(int)height
+		  );
+}
+

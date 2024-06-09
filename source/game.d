@@ -12,6 +12,8 @@ import config;
 
 import sdl_util;
 import shape;
+import mouse_util;
+
 
 /*
   Game은 SDL2 윈도를 책임지는 메인 프레임워크이다.
@@ -42,6 +44,8 @@ class Game {
   bool[SDL_Scancode] key_released;
   bool[SDL_Scancode] key_hold;
 
+  Mouse mouse;
+
   this() {
     this.wc = new WindowConfig();
     this.fc = new FontConfig();
@@ -49,6 +53,7 @@ class Game {
     this.ended = false;
     this.paused = false;
     this.scene = new Scene(this);
+    this.mouse = new Mouse();
 
   }
 
@@ -156,6 +161,26 @@ class Game {
 	this.key_hold[event.key.keysym.sym] = false;
 	this.key_released[event.key.keysym.sym] = true;
 	this.key_pressed[event.key.keysym.sym] = false;
+	break;
+      case SDL_MOUSEMOTION:
+	this.mouse.x = event.motion.x;
+	this.mouse.y = event.motion.y;
+	break;
+      case SDL_MOUSEBUTTONDOWN:
+	if(event.button.button == SDL_BUTTON_LEFT) {
+	  this.mouse.lbutton_down = true;
+	}
+	if(event.button.button == SDL_BUTTON_RIGHT) {
+	  this.mouse.rbutton_down = true;
+	}
+	break;
+      case SDL_MOUSEBUTTONUP:
+	if(event.button.button == SDL_BUTTON_LEFT) {
+	  this.mouse.lbutton_down = false;
+	}
+	if(event.button.button == SDL_BUTTON_RIGHT) {
+	  this.mouse.rbutton_down = false;
+	}
 	break;
       default:
 	// do nothing

@@ -20,6 +20,8 @@ import num_util;
 import key_util;
 import physics;
 
+import std.math;
+
 class Scene {
   Shape[] shapes;
   Game game;
@@ -393,6 +395,52 @@ class Scene {
     this.player.input.right = key_is_activated(this.game.key_hold, SDLK_d);
 
 
+    // 마우스 클릭 처리
+    if(this.game.mouse.lbutton_down == true) {
+      Vec2 mouse_pos = new Vec2(this.game.mouse.x, this.game.mouse.y);
+      // 현재 플레이어 위치에서 mouse_pos 까지의 각도 계산
+      Vec2 difference = mouse_pos - this.player.transform.pos;
+      Vec2 speed = difference.normalize();
+
+      spawn_bullet(this.player.transform.pos, speed);
+    }
+  }
+
+
+  void spawn_bullet(Vec2 pos, Vec2 speed) {
+    if(this.es !is null) {
+      auto entity = this.entities.addEntity("bullet");
+      
+      
+      // this.es 에서의 설정을 가져옴
+      CShape shape = new CShape(
+				this.bs.sr * 2.0,
+				this.bs.sr * 2.0,
+				this.bs.fr,
+				this.bs.fg,
+				this.bs.fb,
+				this.bs.or,
+				this.bs.og,
+				this.bs.ob,
+				this.bs.ot
+				);
+
+      
+      CTransform transform = new CTransform(
+					    
+					    new Vec2(pos.x, pos.y), 
+					    (new Vec2(speed.x,
+						     speed.y)) * this.bs.s
+					    );
+      CCollision collision = new CCollision(this.bs.cr);
+      
+      CLifespan lifespan = new CLifespan(this.bs.l);
+
+      entity.lifespan = lifespan;
+      entity.shape = shape;
+      entity.transform = transform;
+      entity.collision = collision;
+    }
   }
 
   void sUserInput() {
@@ -451,11 +499,20 @@ class Scene {
 
   void sCollision() {
     auto enemies = this.entities.getEntities("enemy");
+    auto bullets = this.entities.getEntities("bullet");
     foreach(enemy; enemies) {
       if(circle_collide(player.transform.pos, cast(float)this.ps.cr, enemy.transform.pos, cast(float)this.es.cr)) {
 	enemy.destroy();
 	// playerr.destroy();
       }
+
+      foreach(bullet; bullets) {
+	if(circle_collide(enemy.transform.pos, cast(float)this.es.cr, bullet.transform.pos, cast(float)this.bs.cr)) {
+	  enemy.destroy();
+	  bullet.destroy();
+	}
+      }
+
 
     }
     

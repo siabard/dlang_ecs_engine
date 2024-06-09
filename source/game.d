@@ -38,6 +38,10 @@ class Game {
   WindowConfig wc;
   FontConfig fc;
 
+  bool[SDL_Scancode] key_pressed;
+  bool[SDL_Scancode] key_released;
+  bool[SDL_Scancode] key_hold;
+
   this() {
     this.wc = new WindowConfig();
     this.fc = new FontConfig();
@@ -136,10 +140,22 @@ class Game {
 
   void event_loop() {
     SDL_Event event;
+    this.key_pressed.clear();
+    this.key_released.clear();
     while(SDL_PollEvent(&event)) {
       switch(event.type) {
       case SDL_QUIT:
 	this.ended = true;
+	break;
+      case SDL_KEYDOWN:
+	this.key_hold[event.key.keysym.sym] = true;
+	this.key_released[event.key.keysym.sym] = false;
+	this.key_pressed[event.key.keysym.sym] = true;
+	break;
+      case SDL_KEYUP:
+	this.key_hold[event.key.keysym.sym] = false;
+	this.key_released[event.key.keysym.sym] = true;
+	this.key_pressed[event.key.keysym.sym] = false;
 	break;
       default:
 	// do nothing
@@ -156,6 +172,11 @@ class Game {
 
       float dt = cast(float)(this.current_time - this.last_time) / 50.0;
       this.event_loop();
+
+      if((SDLK_ESCAPE in this.key_pressed) !is null 
+	 && this.key_pressed[SDLK_ESCAPE] == true) {
+	this.ended = true;
+      }
 
       this.update(dt);
       this.render();

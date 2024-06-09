@@ -17,6 +17,7 @@ import component;
 import types;
 
 import num_util;
+import key_util;
 
 class Scene {
   Shape[] shapes;
@@ -154,10 +155,12 @@ class Scene {
 					    new Vec2(0, 0)
 					    );
       CCollision collision = new CCollision(this.ps.cr);
+      CInput input = new CInput();
 
       entity.shape = shape;
       entity.transform = transform;
       entity.collision = collision;
+      entity.input = input;
 
       this.player = entity;
     }
@@ -221,12 +224,12 @@ class Scene {
     foreach(shape; this.shapes) {   
       shape.update(dt);
     }
-    this.entities.update();
+    sKeyMouseEvent();
     sUserInput();
     sCollision();
     sMovement(dt);
     sEnemySpawner(dt);
-   
+    this.entities.update();   
     
   }
 
@@ -362,7 +365,39 @@ class Scene {
     writeln("movement system end");
   }
 
-  void sUserInput() {}
+  void sKeyMouseEvent() {
+    // W, S D, F (위, 아래, 왼쪽, 오른쪽)
+    // 플레이어 이동함
+
+    this.player.input.up = key_is_activated(this.game.key_hold, SDLK_w);
+    this.player.input.down = key_is_activated(this.game.key_hold, SDLK_s);
+    this.player.input.left = key_is_activated(this.game.key_hold, SDLK_a);
+    this.player.input.right = key_is_activated(this.game.key_hold, SDLK_d);
+
+
+  }
+
+  void sUserInput() {
+    // 플레이어 이동 데이터 생성
+    Vec2 vel = new Vec2();
+    if(this.player !is null && this.player.input !is null && this.player.transform !is null && this.player.input.up) {
+      vel.y -= this.ps.speed;
+    }
+
+    if(this.player !is null && this.player.input !is null && this.player.transform !is null && this.player.input.down) {
+      vel.y += this.ps.speed;
+    }
+
+    if(this.player !is null && this.player.input !is null && this.player.transform !is null && this.player.input.left) {
+      vel.x -= this.ps.speed;
+    }
+
+    if(this.player !is null && this.player.input !is null && this.player.transform !is null && this.player.input.right) {
+      vel.x += this.ps.speed;
+    }
+
+    this.player.transform.velocity = vel.normalize() * this.ps.speed;
+  }
 
   void sRender() {
 

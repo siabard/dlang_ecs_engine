@@ -57,7 +57,8 @@ uint hash(uint x) {
 class Vec2 {
   import std.math;
 
-  float x, y;
+  float x = 0.0;
+  float y = 0.0;
 
   this() {
     this.x = 0.0;
@@ -131,6 +132,10 @@ class Vec2 {
 
   Vec2 normalize() {
     auto l = this.length;
+
+    if(l == 0) {
+      return new Vec2(0.0, 0.0);
+    }
     return new Vec2(this.x / l, this.y / l); 
   }
   
@@ -164,6 +169,9 @@ class Vec2 {
     Vec2 v5 = new Vec2(3, 4);
     assert(v5.dist(new Vec2(0, 0)) == v5.length);
     assert(v5.length() == 5);
+
+    auto norm = v5.normalize();
+    writeln(" Normalize : ", norm.x, " , ", norm.y);
   }
 
   unittest {

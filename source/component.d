@@ -105,3 +105,11 @@ class CShape {
     this.thickness = thickness;
   }
 }
+
+class CVertices {
+  int vertices = 0;
+
+  this(int vertices) {
+    this.vertices = vertices;
+  }
+}

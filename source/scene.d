@@ -2,6 +2,7 @@ import std.stdio;
 import std.string;
 import std.conv;
 import std.algorithm;
+import std.array;
 
 import config;
 import shape: Rectangle, Circle, Shape, render_circle;
@@ -186,6 +187,8 @@ class Scene {
       float x_pos = get_random(this.es.sr, cast(int)x_span);
       float y_pos = get_random(this.es.sr, cast(int)y_span);
 
+      int vert = get_random(this.es.vmin, this.es.vmax + 1);
+
       CShape shape = new CShape(
 				this.es.sr * 2.0,
 				this.es.sr * 2.0,
@@ -206,7 +209,7 @@ class Scene {
 						     speed * sin(theta))
 					    );
       CCollision collision = new CCollision(this.es.cr);
-      
+      CVertices vertices = new CVertices(vert);
       // TEST
       // CLifespan lifespan = new CLifespan(120);
 
@@ -214,6 +217,7 @@ class Scene {
       entity.shape = shape;
       entity.transform = transform;
       entity.collision = collision;
+      entity.vertices = vertices;
     }
   }
 
@@ -404,8 +408,54 @@ class Scene {
 
       spawn_bullet(this.player.transform.pos, speed);
     }
+
+    if(this.game.mouse.rbutton_down == true) {
+      spawn_special_bullets(this.player.transform.pos);
+    }
   }
 
+  
+  void spawn_special_bullets(Vec2 pos) {
+    if(this.es !is null && this.bs !is null) {
+      float speed = this.bs.s;
+      
+      float unit_theta = 2.0 * PI / 10;
+
+      // 한 10개 정도를 뿌려라..
+      for(auto i = 0; i < 10; i++) {
+	auto entity = this.entities.addEntity("bullet");
+      
+      
+      // this.es 에서의 설정을 가져옴
+      CShape shape = new CShape(
+				this.bs.sr * 2.0 / 4.0,
+				this.bs.sr * 2.0 / 4.0,
+				this.bs.fr,
+				this.bs.fg,
+				this.bs.fb,
+				this.bs.or,
+				this.bs.og,
+				this.bs.ob,
+				this.bs.ot
+				);
+
+      
+      CTransform transform = new CTransform(
+					    new Vec2(pos.x, pos.y), 
+					    (new Vec2(cos(unit_theta * i) * speed,
+						      sin(unit_theta * i) * speed)) 
+					    );
+      CCollision collision = new CCollision(this.bs.cr / 4.0);
+      
+      CLifespan lifespan = new CLifespan(this.bs.l / 5.0);
+      entity.lifespan = lifespan;
+      entity.shape = shape;
+      entity.transform = transform;
+      entity.collision = collision;
+      }
+      
+    }
+  }
 
   void spawn_bullet(Vec2 pos, Vec2 speed) {
     if(this.es !is null) {
@@ -435,11 +485,45 @@ class Scene {
       CCollision collision = new CCollision(this.bs.cr);
       
       CLifespan lifespan = new CLifespan(this.bs.l);
-
       entity.lifespan = lifespan;
       entity.shape = shape;
       entity.transform = transform;
       entity.collision = collision;
+    }
+  }
+
+  void spawn_small_enemies(Entity entity) {
+    if(entity.vertices !is null && entity.transform !is null && entity.is_alive) {
+      int vert = entity.vertices.vertices;
+
+      float unit_theta = 2.0 * PI / vert;
+      float vel = entity.transform.velocity.length();
+
+      for(auto i = 0; i < vert; i++) {
+	CLifespan lifespan = new CLifespan(30);
+	Vec2 vec = new Vec2(
+			    cos(unit_theta * i) * vel,
+			    sin(unit_theta * i) * vel);
+	
+	auto part = this.entities.addEntity("enemy");
+	CShape shape = new CShape(
+				this.es.sr / 2.0,
+				this.es.sr  / 2.0,
+				0,
+				0,
+				0,
+				this.es.or,
+				this.es.og,
+				this.es.ob,
+				this.es.ot
+				);
+	CCollision collision = new CCollision(this.es.cr / 2.0);
+	part.transform = new CTransform(entity.transform.pos, vec);
+	part.lifespan = lifespan;
+	part.shape = shape;
+	part.collision = collision;
+	
+      }
     }
   }
 
@@ -470,16 +554,22 @@ class Scene {
     // Shape 이 있는 항목에 대한 그림 그리기 (사각형)
     foreach(entity; this.entities.getEntities()) {
       if(entity.transform !is null && entity.shape !is null) {
+	
+	ubyte alpha = 0xff;
+	if(entity.lifespan !is null) {
+	  alpha = cast(ubyte)((cast(float)alpha) * (entity.lifespan.total - entity.lifespan.duration) / entity.lifespan.total);
+	}
+	
 	CShape shape = entity.shape;
 	
 	Rect bound =  get_bound_rect(entity.transform.pos, entity.shape.width, entity.shape.height);
 	
 
-	SDL_SetRenderDrawColor(this.game.renderer, shape.r, shape.g, shape.b, 0xff);
+	SDL_SetRenderDrawColor(this.game.renderer, shape.r, shape.g, shape.b, alpha);
 	SDL_RenderFillRect(this.game.renderer, new SDL_Rect(bound.x, bound.y, bound.w, bound.h));
 	
 	// 테두리 그리기
-	SDL_SetRenderDrawColor(this.game.renderer, shape.br, shape.bg, shape.bb, 0xff);
+	SDL_SetRenderDrawColor(this.game.renderer, shape.br, shape.bg, shape.bb, alpha);
 	SDL_RenderDrawPoint(this.game.renderer, cast(int)(entity.transform.pos.x), cast(int)(entity.transform.pos.y));
 	SDL_RenderDrawRect(this.game.renderer, new SDL_Rect(bound.x, bound.y, bound.w, bound.h));
       }
@@ -498,24 +588,35 @@ class Scene {
   }
 
   void sCollision() {
-    auto enemies = this.entities.getEntities("enemy");
-    auto bullets = this.entities.getEntities("bullet");
+    auto enemies = this.entities.getEntities("enemy").filter!(e => e.is_alive == true).array();
+    auto bullets = this.entities.getEntities("bullet").filter!(e => e.is_alive == true).array();
+
     foreach(enemy; enemies) {
-      if(circle_collide(player.transform.pos, cast(float)this.ps.cr, enemy.transform.pos, cast(float)this.es.cr)) {
+      if((enemy.is_alive == true &&
+	  player.is_alive == true) && 
+	 circle_collide(
+			player.transform.pos, 
+			cast(float)this.ps.cr, 
+			enemy.transform.pos, 
+			cast(float)this.es.cr)) {
 	enemy.destroy();
-	// playerr.destroy();
+	player.destroy();
+	spawn_player();
       }
 
       foreach(bullet; bullets) {
-	if(circle_collide(enemy.transform.pos, cast(float)this.es.cr, bullet.transform.pos, cast(float)this.bs.cr)) {
+	if(enemy.is_alive == true &&
+	   bullet.is_alive == true &&
+	   circle_collide(
+			  enemy.transform.pos, 
+			  cast(float)this.es.cr, 
+			  bullet.transform.pos, 
+			  cast(float)this.bs.cr)) {
+	  spawn_small_enemies(enemy);
 	  enemy.destroy();
 	  bullet.destroy();
 	}
       }
-
-
     }
-    
   }
-
 } // End of Class Scene

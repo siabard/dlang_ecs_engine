@@ -83,6 +83,7 @@ class Game {
 	  writeln("Game::GAME_INIT::Cannot make Renderer");
 	  this.sdl_available = false;
 	}
+	SDL_SetRenderDrawBlendMode(this.renderer, SDL_BLENDMODE_BLEND);
       }
 
       this.scene.scene_init();

@@ -119,17 +119,13 @@ class Entity {
   CScore score = null;
   CShape shape = null;
   CInput input = null;
-  CLifespan lifespan;
+  CLifespan lifespan = null;
+  CVertices vertices = null;
 
   this(string tag, uint entity_id) {
     this.entity_id = entity_id;
     this.tag = tag;
     this.is_alive = true;
-    this.transform = null;
-    this.name = null;
-    this.collision = null;
-    this.score = null;
-
   }
 
   void destroy() {

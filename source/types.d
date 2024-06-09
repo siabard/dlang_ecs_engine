@@ -171,6 +171,7 @@ class Vec2 {
     assert(v5.length() == 5);
 
     auto norm = v5.normalize();
+    writeln(" Original : ", v5.x, " , ", v5.y);
     writeln(" Normalize : ", norm.x, " , ", norm.y);
   }
 

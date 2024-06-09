@@ -29,6 +29,87 @@ class CName {
   }
 }
 
-class CShape {}
 
-class CBBox {}
+class CCollision {
+  float radius;
+
+  this(float radius) {
+    this.radius = radius;
+  }
+}
+
+
+class CScore {
+  int score;
+
+  this(int score) {
+    this.score = score;
+  }
+}
+
+
+class CLifespan {
+  float duration;
+  float total;
+
+  this(float total) {
+    this.duration = 0;
+    this.total = total;
+  }
+}
+
+class CInput {
+  bool up = false;
+  bool down = false;
+  bool right = false;
+  bool left = false;
+
+  bool shoot = false;
+}
+
+class CShape {
+  float width  = 0.0;
+  float height = 0.0;
+
+  // 도형 색상 
+  ubyte r = 0;
+  ubyte g = 0;
+  ubyte b = 0;
+
+  // 도형 테두리 색상
+  ubyte br = 0;
+  ubyte bg = 0;
+  ubyte bb = 0;
+
+  // 도형 테두리 두께
+  int thickness = 0;
+
+  this(float width, float height, ubyte r, ubyte g, ubyte b, int thickness) {
+    this.width = width;
+    this.height = height;
+    this.r = r;
+    this.g = g;
+    this.b = b;
+    this.thickness = thickness;
+  }
+
+  this(float width, float height, ubyte r, ubyte g, ubyte b, ubyte br, ubyte bg, ubyte bb, int thickness) {
+    this.width = width;
+    this.height = height;
+    this.r = r;
+    this.g = g;
+    this.b = b;
+    this.br = br;
+    this.bg = bg;
+    this.bb = bb;
+    this.thickness = thickness;
+  }
+}
+
+class CVertices {
+  int vertices = 0;
+
+  this(int vertices) {
+    this.vertices = vertices;
+  }
+}

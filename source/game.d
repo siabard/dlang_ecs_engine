@@ -8,10 +8,12 @@ import loader = bindbc.loader.sharedlib;
 import constants;
 
 import scene;
-import config: WindowConfig, FontConfig;
+import config;
 
 import sdl_util;
 import shape;
+import mouse_util;
+
 
 /*
   Game은 SDL2 윈도를 책임지는 메인 프레임워크이다.
@@ -30,6 +32,7 @@ class Game {
   SDL_Renderer* renderer;
 
   bool ended;
+  bool paused;
   
   uint current_time;
   uint last_time;
@@ -37,12 +40,20 @@ class Game {
   WindowConfig wc;
   FontConfig fc;
 
+  bool[SDL_Scancode] key_pressed;
+  bool[SDL_Scancode] key_released;
+  bool[SDL_Scancode] key_hold;
+
+  Mouse mouse;
+
   this() {
     this.wc = new WindowConfig();
     this.fc = new FontConfig();
     this.sdl_available = false;
     this.ended = false;
+    this.paused = false;
     this.scene = new Scene(this);
+    this.mouse = new Mouse();
 
   }
 
@@ -72,6 +83,7 @@ class Game {
 	  writeln("Game::GAME_INIT::Cannot make Renderer");
 	  this.sdl_available = false;
 	}
+	SDL_SetRenderDrawBlendMode(this.renderer, SDL_BLENDMODE_BLEND);
       }
 
       this.scene.scene_init();
@@ -134,10 +146,42 @@ class Game {
 
   void event_loop() {
     SDL_Event event;
+    this.key_pressed.clear();
+    this.key_released.clear();
     while(SDL_PollEvent(&event)) {
       switch(event.type) {
       case SDL_QUIT:
 	this.ended = true;
+	break;
+      case SDL_KEYDOWN:
+	this.key_hold[event.key.keysym.sym] = true;
+	this.key_released[event.key.keysym.sym] = false;
+	this.key_pressed[event.key.keysym.sym] = true;
+	break;
+      case SDL_KEYUP:
+	this.key_hold[event.key.keysym.sym] = false;
+	this.key_released[event.key.keysym.sym] = true;
+	this.key_pressed[event.key.keysym.sym] = false;
+	break;
+      case SDL_MOUSEMOTION:
+	this.mouse.x = event.motion.x;
+	this.mouse.y = event.motion.y;
+	break;
+      case SDL_MOUSEBUTTONDOWN:
+	if(event.button.button == SDL_BUTTON_LEFT) {
+	  this.mouse.lbutton_down = true;
+	}
+	if(event.button.button == SDL_BUTTON_RIGHT) {
+	  this.mouse.rbutton_down = true;
+	}
+	break;
+      case SDL_MOUSEBUTTONUP:
+	if(event.button.button == SDL_BUTTON_LEFT) {
+	  this.mouse.lbutton_down = false;
+	}
+	if(event.button.button == SDL_BUTTON_RIGHT) {
+	  this.mouse.rbutton_down = false;
+	}
 	break;
       default:
 	// do nothing
@@ -154,6 +198,11 @@ class Game {
 
       float dt = cast(float)(this.current_time - this.last_time) / 50.0;
       this.event_loop();
+
+      if((SDLK_ESCAPE in this.key_pressed) !is null 
+	 && this.key_pressed[SDLK_ESCAPE] == true) {
+	this.ended = true;
+      }
 
       this.update(dt);
       this.render();

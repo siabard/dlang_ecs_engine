@@ -6,6 +6,7 @@ import std.array;
 import std.algorithm.mutation;
 
 import types;
+import shape;
 
 alias EntityVec = Entity[];
 alias EntityMap = EntityVec[string];
@@ -112,24 +113,32 @@ class Entity {
   uint entity_id;
   bool is_alive;
 
-  CTransform transform;
-  CName name;
-  CShape shape;
-  CBBox box;
+  CTransform transform = null;
+  CName name = null;
+  CCollision collision = null;
+  CScore score = null;
+  CShape shape = null;
+  CInput input = null;
+  CLifespan lifespan = null;
+  CVertices vertices = null;
 
   this(string tag, uint entity_id) {
     this.entity_id = entity_id;
     this.tag = tag;
     this.is_alive = true;
-    this.transform = null;
-    this.name = null;
-    this.shape = null;
-    this.box = null;
-
   }
 
   void destroy() {
     this.is_alive = false;
   }
-
 }
+
+Rect get_bound_rect(Vec2 pos, float width, float height) {
+  return new Rect(
+		  cast(int)(pos.x - width / 2.0),
+		  cast(int)(pos.y - height / 2.0),
+		  cast(int)width,
+		  cast(int)height
+		  );
+}
+

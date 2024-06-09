@@ -18,6 +18,7 @@ import types;
 
 import num_util;
 import key_util;
+import physics;
 
 class Scene {
   Shape[] shapes;
@@ -204,6 +205,10 @@ class Scene {
 					    );
       CCollision collision = new CCollision(this.es.cr);
       
+      // TEST
+      // CLifespan lifespan = new CLifespan(120);
+
+      // entity.lifespan = lifespan;
       entity.shape = shape;
       entity.transform = transform;
       entity.collision = collision;
@@ -226,11 +231,24 @@ class Scene {
     }
     sKeyMouseEvent();
     sUserInput();
+    sLifespan(dt);
     sCollision();
     sMovement(dt);
     sEnemySpawner(dt);
     this.entities.update();   
     
+  }
+
+  void sLifespan(float dt) {
+    foreach(entity; this.entities.getEntities()) {
+      if(entity.lifespan !is null) {
+	entity.lifespan.duration += dt;
+
+	if(entity.lifespan.duration >= entity.lifespan.total) {
+	  entity.destroy();
+	}
+      }
+    }
   }
 
   void render() {
@@ -414,6 +432,7 @@ class Scene {
 	
 	// 테두리 그리기
 	SDL_SetRenderDrawColor(this.game.renderer, shape.br, shape.bg, shape.bb, 0xff);
+	SDL_RenderDrawPoint(this.game.renderer, cast(int)(entity.transform.pos.x), cast(int)(entity.transform.pos.y));
 	SDL_RenderDrawRect(this.game.renderer, new SDL_Rect(bound.x, bound.y, bound.w, bound.h));
       }
     }
@@ -433,7 +452,11 @@ class Scene {
   void sCollision() {
     auto enemies = this.entities.getEntities("enemy");
     foreach(enemy; enemies) {
-      // if collide enemy should be destroyed.
+      if(circle_collide(player.transform.pos, cast(float)this.ps.cr, enemy.transform.pos, cast(float)this.es.cr)) {
+	enemy.destroy();
+	// playerr.destroy();
+      }
+
     }
     
   }

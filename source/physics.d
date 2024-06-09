@@ -13,7 +13,7 @@ bool circle_collide(Vec2 c1, float r1, Vec2 c2, float r2) {
     
   float radius_diff = r1 + r2;
   
-  return distance < radius_diff;
+  return distance < radius_diff * radius_diff;
 }
 
 // aabb

@@ -49,10 +49,12 @@ class CScore {
 
 
 class CLifespan {
-  int duration;
+  float duration;
+  float total;
 
-  this(int duration) {
-    this.duration = duration;
+  this(float total) {
+    this.duration = 0;
+    this.total = total;
   }
 }
 

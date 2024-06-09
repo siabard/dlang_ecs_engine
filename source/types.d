@@ -190,23 +190,16 @@ class Vec2 {
   }
 }
 
-
-bool circle_collide(Vec2 p1, Vec2 p2, float r1, float r2) {
-  float dist_sqaure = (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y);
-  
-  return dist_sqaure < ((r1 + r2) * (r1 + r2));
-}
-
 unittest {
   import std.stdio;
-
+  import physics;
   writeln("circle collisions");
   
   Vec2 p1 = new Vec2(2, 2);
   Vec2 p2 = new Vec2(4, 2);
 
-  assert(circle_collide(p1, p2, 1.0, 1.0) == false);
-  assert(circle_collide(p1, p2, 1.1, 1.0) == true);
+  assert(circle_collide(p1, 1.0, p2, 1.0) == false);
+  assert(circle_collide(p1, 1.1, p2, 1.0) == true);
 
   writeln("all circle test passed");
 

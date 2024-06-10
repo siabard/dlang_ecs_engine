@@ -57,10 +57,10 @@ class Game {
 
   }
 
-  void game_init() {
+  void game_init(string path) {
 
     this.sdl_available = init_sdl();
-    load_config("./assets/config.txt");
+    load_config(path);
 
     if(this.sdl_available) {
       SDL_Init(SDL_INIT_VIDEO);

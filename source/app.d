@@ -5,7 +5,7 @@ void main()
 
   Game game = new Game();
 
-  game.game_init();
+  game.game_init("./assets/config.txt");
 
   if(game.sdl_available) {
     game.game_run();

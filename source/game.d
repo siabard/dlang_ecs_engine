@@ -8,6 +8,7 @@ import loader = bindbc.loader.sharedlib;
 import constants;
 
 import scene;
+import scene_geowar;
 import config;
 
 import sdl_util;
@@ -26,7 +27,8 @@ import mouse_util;
 class Game {
   
   bool sdl_available;
-  Scene scene;
+  string current_scene;
+  Scene[string] scene;
 
   SDL_Window* window;
   SDL_Renderer* renderer;
@@ -52,7 +54,6 @@ class Game {
     this.sdl_available = false;
     this.ended = false;
     this.paused = false;
-    this.scene = new Scene(this);
     this.mouse = new Mouse();
 
   }
@@ -85,8 +86,9 @@ class Game {
 	}
 	SDL_SetRenderDrawBlendMode(this.renderer, SDL_BLENDMODE_BLEND);
       }
-
-      this.scene.scene_init();
+      this.current_scene = "geowar";
+      this.scene[this.current_scene] = new SceneGeoWar(this, "./assets/config.txt");
+      this.scene[this.current_scene].scene_init();
     }
   }
 
@@ -213,7 +215,7 @@ class Game {
 
   void update(float dt) {
     // 경과된 Tick을 계산한다.
-    this.scene.update(dt);
+    this.scene[this.current_scene].update(dt);
     
   }
 
@@ -227,7 +229,7 @@ class Game {
 
 
     // draw screen
-    this.scene.render();
+    this.scene[this.current_scene].render();
 
     SDL_RenderPresent(this.renderer);
   }

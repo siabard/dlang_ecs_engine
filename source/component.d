@@ -3,15 +3,9 @@ module component;
 import types;
 
 class CTransform {
-  Vec2 pos;
-  Vec2 prev_pos;
-  Vec2 velocity;
-
-  this() {
-    this.pos = new Vec2(0, 0);
-    this.prev_pos = new Vec2(0, 0);
-    this.velocity = new Vec2(0, 0);
-  }
+  Vec2 pos = new Vec2(0, 0);
+  Vec2 prev_pos = new Vec2(0, 0);
+  Vec2 velocity = new Vec2(0, 0);
 
   this(const Vec2 p, const Vec2 v) {
     this.pos = new Vec2(p.x, p.y);

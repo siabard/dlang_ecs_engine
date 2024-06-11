@@ -132,13 +132,3 @@ class Entity {
     this.is_alive = false;
   }
 }
-
-Rect get_bound_rect(Vec2 pos, float width, float height) {
-  return new Rect(
-		  cast(int)(pos.x - width / 2.0),
-		  cast(int)(pos.y - height / 2.0),
-		  cast(int)width,
-		  cast(int)height
-		  );
-}
-

@@ -4,10 +4,12 @@ import types;
 
 class CTransform {
   Vec2 pos;
+  Vec2 prev_pos;
   Vec2 velocity;
 
   this() {
     this.pos = new Vec2(0, 0);
+    this.prev_pos = new Vec2(0, 0);
     this.velocity = new Vec2(0, 0);
   }
 

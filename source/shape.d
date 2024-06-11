@@ -1,4 +1,4 @@
-import types: Rect;
+import types: Rect, Vec2;
 import constants;
 
 import std.algorithm;
@@ -214,6 +214,16 @@ void render_circle(SDL_Renderer* renderer, Circle circ) {
       x = x - 1;
     }
   }
+}
+
+
+Rect get_bound_rect(Vec2 pos, float width, float height) {
+  return new Rect(
+		  cast(int)(pos.x - width / 2.0),
+		  cast(int)(pos.y - height / 2.0),
+		  cast(int)width,
+		  cast(int)height
+		  );
 }
 
 

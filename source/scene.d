@@ -5,8 +5,8 @@ import std.algorithm;
 import std.array;
 
 import config;
-import shape: Rectangle, Circle, Shape, render_circle;
-import types: Rect;
+import shape;
+import types;
 
 import constants;
 import entity;
@@ -15,7 +15,6 @@ import game;
 import bindbc.sdl;
 
 import component;
-import types;
 
 import num_util;
 import key_util;
@@ -238,8 +237,8 @@ class Scene {
     sKeyMouseEvent();
     sUserInput();
     sLifespan(dt);
-    sCollision();
     sMovement(dt);
+    sCollision();
     sEnemySpawner(dt);
     this.entities.update();   
     
@@ -342,6 +341,8 @@ class Scene {
     
     foreach(entity; this.entities.getEntities()) {
       if(entity.transform !is null && entity.shape !is null) {
+	entity.transform.prev_pos.x = entity.transform.pos.x;
+	entity.transform.prev_pos.y = entity.transform.pos.y;
 	entity.transform.pos.x = entity.transform.pos.x + entity.transform.velocity.x * dt;
 	entity.transform.pos.y = entity.transform.pos.y + entity.transform.velocity.y * dt;
 

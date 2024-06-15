@@ -65,7 +65,7 @@ class Game {
 
     if(this.sdl_available) {
       SDL_Init(SDL_INIT_VIDEO);
-
+      Mix_OpenAudio( 22_050, MIX_DEFAULT_FORMAT, 2, 4096 );
       this.window = 
 	SDL_CreateWindow(
 			 "SDL2 D Game Engine", 
@@ -139,6 +139,7 @@ class Game {
       }
       
       TTF_Quit();
+      Mix_CloseAudio();
       Mix_Quit();
       IMG_Quit();
       SDL_Quit();

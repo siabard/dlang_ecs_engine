@@ -22,6 +22,7 @@ import physics;
 
 import std.math;
 import scene;
+import action;
 
 class SceneGeoWar: Scene {
   EntityManager entities;
@@ -101,6 +102,11 @@ class SceneGeoWar: Scene {
 	}
       }
     }
+
+    register_action(SDLK_w, "UP");
+    register_action(SDLK_s, "DOWN");
+    register_action(SDLK_a, "LEFT");
+    register_action(SDLK_d, "RIGHT");
 
     spawn_player();
   }
@@ -279,11 +285,12 @@ class SceneGeoWar: Scene {
     // W, S D, F (위, 아래, 왼쪽, 오른쪽)
     // 플레이어 이동함
 
+    /*
     this.player.input.up = key_is_activated(this.game.key_hold, SDLK_w);
     this.player.input.down = key_is_activated(this.game.key_hold, SDLK_s);
     this.player.input.left = key_is_activated(this.game.key_hold, SDLK_a);
     this.player.input.right = key_is_activated(this.game.key_hold, SDLK_d);
-
+    */
 
     // 마우스 클릭 처리
     if(this.game.mouse.lbutton_down == true) {
@@ -504,6 +511,31 @@ class SceneGeoWar: Scene {
       }
     }
   }
+
+  override void sAction(Action action) {
+    if(action.m_type == "START") {
+      if(action.m_name == "UP") {
+	this.player.input.up = true;
+      } else if(action.m_name == "DOWN") {
+	this.player.input.down = true;
+      } else if(action.m_name == "LEFT") {
+	this.player.input.left = true;
+      } else if(action.m_name == "RIGHT") {
+	this.player.input.right = true;
+      }
+    } else if (action.m_type == "END") {
+      if(action.m_name == "UP") {
+	this.player.input.up = false;
+      } else if(action.m_name == "DOWN") {
+	this.player.input.down = false;
+      } else if(action.m_name == "LEFT") {
+	this.player.input.left = false;
+      } else if(action.m_name == "RIGHT") {
+	this.player.input.right = false;
+      }
+      
+    } 
+  } // end of sAction
 
 
 } // End of Class Scene

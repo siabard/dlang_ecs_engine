@@ -1,0 +1,42 @@
+Texture   TexStand   resources/images/megaman/stand64.png
+Texture   TexRun     resources/images/megaman/run64.png
+Texture   TexAir     resources/images/megaman/air64.png
+Texture   TexBuster  resources/images/megaman/buster.png
+Texture   TexExplode resources/images/misc/explosion128.png
+Texture   TexCoin    resources/images/misc/coinspin.png
+Texture   TexBrick   resources/images/mario/brick.png
+Texture   TexQ       resources/images/mario/qfade.png
+Texture   TexQ2      resources/images/mario/question2.png
+Texture   TexPipeS   resources/images/mario/pipesmall.png
+Texture   TexPipeT   resources/images/mario/pipetall.png
+Texture   TexCloudB  resources/images/mario/cloudbig.png
+Texture   TexCloudS  resources/images/mario/cloudsmall.png
+Texture   TexBush    resources/images/mario/bush.png
+Texture   TexBushBig resources/images/mario/bushbig.png
+Texture   TexGround  resources/images/mario/ground.png
+Texture   TexBlock   resources/images/mario/block.png
+Texture   TexPole    resources/images/mario/flagpole.png
+Texture   TexPoleTop resources/images/mario/flagtop.png
+Texture   TexFlag    resources/images/mario/flag.png
+Animation Stand      TexStand    1    0
+Animation Run        TexRun      3   10
+Animation Air        TexAir      1    0
+Animation Buster     TexBuster   1    0
+Animation Explosion  TexExplode 48    2
+Animation Coin       TexCoin     6    5
+Animation Question   TexQ        4   10
+Animation Brick      TexBrick    1    0
+Animation Question2  TexQ2       1    0
+Animation PipeTall   TexPipeT    1    0
+Animation PipeSmall  TexPipeS    1    0
+Animation CloudBig   TexCloudB   1    0
+Animation CloudSmall TexCloudS   1    0
+Animation Bush       TexBush     1    0
+Animation BushBig    TexBushBig  1    0
+Animation Ground     TexGround   1    0
+Animation Block      TexBlock    1    0
+Animation Flag       TexFlag     1    0
+Animation Pole       TexPole     1    0
+Animation PoleTop    TexPoleTop  1    0
+Font      Arial      resources/fonts/arial.ttf
+Font      Mario      resources/fonts/mario.ttf

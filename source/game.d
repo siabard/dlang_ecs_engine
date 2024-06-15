@@ -14,7 +14,7 @@ import config;
 import sdl_util;
 import shape;
 import mouse_util;
-
+import action;
 
 /*
   Game은 SDL2 윈도를 책임지는 메인 프레임워크이다.
@@ -190,6 +190,18 @@ class Game {
 	// do nothing
 	break;
       }
+      
+      if(event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
+	if( event.key.keysym.sym in this.scene[this.current_scene].action_map ) {
+	  string action_type = (event.type == SDL_KEYDOWN) ? "START" : "END" ;
+	  this.scene[this.current_scene].do_action( 
+						new Action( 
+							   this.scene[this.current_scene].action_map[event.key.keysym.sym], 
+							   action_type));
+
+	}
+      }
+      
     }
   }
 

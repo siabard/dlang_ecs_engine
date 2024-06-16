@@ -15,6 +15,7 @@ import sdl_util;
 import shape;
 import mouse_util;
 import action;
+import asset_manager;
 
 /*
   Game은 SDL2 윈도를 책임지는 메인 프레임워크이다.
@@ -40,7 +41,7 @@ class Game {
   uint last_time;
 
   WindowConfig wc;
-  FontConfig fc;
+  AssetManager am;
 
   bool[SDL_Scancode] key_pressed;
   bool[SDL_Scancode] key_released;
@@ -50,7 +51,7 @@ class Game {
 
   this() {
     this.wc = new WindowConfig();
-    this.fc = new FontConfig();
+    this.am = new AssetManager();
     this.sdl_available = false;
     this.ended = false;
     this.paused = false;
@@ -105,7 +106,7 @@ class Game {
       // writeln("read line -> |", line, line.length);
 
       if(line.length > 0) {
-	string[] tokens = line.split(" ");
+	string[] tokens = line.split;
       
 	if(tokens[0].toLower() == "window") {
 	  float width = to!float(tokens[1]);
@@ -115,14 +116,26 @@ class Game {
 	  this.wc.height = height;
 	} else if(tokens[0].toLower() == "font") {
 	
-	  this.fc.path = tokens[1];
-	  this.fc.size = to!int(tokens[2]);
-	  this.fc.r = to!ubyte(tokens[3]);
-	  this.fc.g = to!ubyte(tokens[4]);
-	  this.fc.b = to!ubyte(tokens[5]);
+	  auto font_name = tokens[1];
+	  auto font_path = tokens[2];
+	  auto font_size = to!int(tokens[3]);
 
-	  this.fc.font =  TTF_OpenFont(("./" ~ this.fc.path).toStringz, this.fc.size);
-	} 
+	  this.am.add_font(font_name, font_path, font_size);
+	} else if(tokens[0].toLower() == "texture") {
+	  auto texture_name = tokens[1];
+	  auto texture_path = tokens[2];
+	  this.am.add_texture(texture_name, texture_path, this.renderer);
+	} else if(tokens[0].toLower() == "animation") {
+	  string animation_name = tokens[1];
+	  string texture_name = tokens[2];
+	  uint frame_count = to!uint(tokens[3]);
+	  int animation_speed = to!int(tokens[4]);
+
+	  this.am.add_animation(animation_name,
+				texture_name,
+				frame_count,
+				animation_speed);
+	}
       }
     }
   }

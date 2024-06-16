@@ -1,6 +1,7 @@
 module component;
 
 import types;
+import animation;
 
 class CTransform {
   Vec2 pos = new Vec2(0, 0);
@@ -108,4 +109,10 @@ class CVertices {
   this(int vertices) {
     this.vertices = vertices;
   }
+}
+
+
+// Animation
+class CAnimaion {
+  Animation[string] animations;
 }

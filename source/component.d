@@ -128,3 +128,8 @@ class CBoundingBox {
     this.height = h;
   }
 }
+
+
+class CGravity {
+  float gravity = 0.0;
+}

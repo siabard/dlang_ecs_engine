@@ -13,6 +13,7 @@ class Animation {
   int animation_speed = 0; // 초당 몇 프레임?
   float elapsed_time = 0.0; // 현재 프레임 경과 시간..
   Vec2 size = new Vec2(0, 0); // 한 프레임의 크기 
+  SDL_RendererFlip flip_h = SDL_FLIP_NONE;
 
   this(SDL_Texture* texture, uint frame_count, int animation_speed) {
     int width , height;
@@ -42,6 +43,6 @@ class Animation {
       new SDL_Rect(this.current_frame * cast(int)this.size.x, 0, 
 		   cast(int)this.size.x, cast(int)this.size.y);
     
-    this.sprite.render(renderer, src_rect, tgt_rect);
+    this.sprite.render(renderer, src_rect, tgt_rect, this.flip_h);
   }
 }

@@ -202,11 +202,15 @@ class SceneMario: Scene {
       CBoundingBox box = new CBoundingBox(this.ps.cw, this.ps.ch);
       CInput input = new CInput();
 
+      // Gravity
+      CGravity gravity = new CGravity();
+      gravity.gravity = this.ps.gy;
 
       entity.transform = transform;
       entity.box = box;
       entity.input = input;
       entity.animation = animation;
+      entity.gravity = gravity;
 
       this.player = entity;
     }
@@ -272,6 +276,7 @@ class SceneMario: Scene {
     sKeyMouseEvent();
     sUserInput();
     sLifespan(dt);
+    sGravity(dt);
     sMovement(dt);
     sCollision();
     sEnemySpawner(dt);
@@ -479,17 +484,38 @@ class SceneMario: Scene {
   }
 
   void sUserInput() {
-    // 플레이어 이동 데이터 생성
+    // Player 이동 데이터 생성
     Vec2 vel = new Vec2();
     if(this.player !is null && this.player.input !is null && this.player.transform !is null && this.player.input.left) {
-      vel.x -= this.ps.sx;
+      vel.x -= this.ps.sm;
     }
 
     if(this.player !is null && this.player.input !is null && this.player.transform !is null && this.player.input.right) {
-      vel.x += this.ps.sx;
+      vel.x += this.ps.sm;
     }
 
     this.player.transform.velocity = vel.normalize() * this.ps.sx;
+    Animation current_animation = this.player.animation.animations[this.player.animation.current_animation];
+
+    if(this.player.transform.velocity.x < 0 && current_animation.flip_h == SDL_FLIP_NONE) {
+      // 왼쪽 바라보게 하기 
+      current_animation.flip_h = SDL_FLIP_HORIZONTAL;
+    } else if(this.player.transform.velocity.x > 0 && current_animation.flip_h != SDL_FLIP_NONE) {
+      // 오른쪽 바라보게 하기
+      current_animation.flip_h = SDL_FLIP_NONE;
+    }
+  }
+
+  void sGravity(float dt) {
+    foreach(entity; this.entities.getEntities()) {
+      if(entity.transform !is null && entity.gravity !is null) {
+	float y_acc = entity.transform.velocity.y;
+
+	y_acc += entity.gravity.gravity * dt;
+
+	entity.transform.velocity.y = max(this.ps.sm, y_acc);
+      }
+    }
   }
 
   void sRender() {
@@ -507,6 +533,7 @@ class SceneMario: Scene {
 	Vec2 pos = entity.transform.pos;
 	// 노출할 애니메이션
 	auto current_animation = entity.animation.animations[entity.animation.current_animation];
+
 	// 애니메이션의 폭
 	Vec2 size = current_animation.size;
 	

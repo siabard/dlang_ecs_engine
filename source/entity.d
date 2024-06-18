@@ -124,6 +124,7 @@ class Entity {
   CVertices vertices = null;
   CAnimation animation = null;
   CBoundingBox box = null;
+  CGravity gravity = null;
 
   this(string tag, uint entity_id) {
     this.entity_id = entity_id;

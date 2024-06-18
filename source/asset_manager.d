@@ -54,7 +54,6 @@ class AssetManager {
   void add_texture(string name, string path, SDL_Renderer* renderer) {
     auto texture = IMG_LoadTexture(renderer, ("./" ~ path).toStringz);
     if(texture !is null) {
-      writeln("texture: ", name , "  path: ", "./" ~ path);
       this.textures[name] = texture;
     } else {
       writeln("texture: ", name , "  is null on path: ", "./" ~ path);
@@ -86,10 +85,10 @@ class AssetManager {
   }
 
   void add_animation(string name, string texture_name, uint frame_count, int animation_speed) {
-    writeln("animation name :", name, " texture ", texture_name);
     this.animations[name] = new Animation(
 					  this.textures[texture_name], 
 					  frame_count, animation_speed);
+
   }
 
   SDL_Texture* get_texture(string name) {

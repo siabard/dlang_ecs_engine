@@ -142,11 +142,13 @@ class SceneMario: Scene {
     entity.animation = new CAnimation();
     entity.animation.current_animation = animation_name;
     entity.animation.animations[animation_name] = this.game.am.get_animation(animation_name);
+    
+    auto current_animation = entity.animation.animations[entity.animation.current_animation];
 
     // 좌표 설정 및 이동속도 (멈춰있음) 설정
     float y_pos = this.game.wc.height - grid_y * 64;
     float x_pos = grid_x * 64;
-    Vec2 pos = new Vec2(x_pos + 32, y_pos - 32); // pos 는 해당 셀의 중점을 가르킴
+    Vec2 pos = new Vec2(x_pos + current_animation.size.x / 2, y_pos - current_animation.size.y / 2); // pos 는 해당 셀의 중점을 가르킴
 
 
     CTransform transform = new CTransform(pos, new Vec2(0, 0));
@@ -166,11 +168,12 @@ class SceneMario: Scene {
     entity.animation.current_animation = animation_name;
     entity.animation.animations[animation_name] = this.game.am.get_animation(animation_name);
 
+    auto current_animation = entity.animation.animations[entity.animation.current_animation];
+
     // 좌표 설정 및 이동속도 (멈춰있음) 설정
     float y_pos = this.game.wc.height - grid_y * 64;
     float x_pos = grid_x * 64;
-    Vec2 pos = new Vec2(x_pos + 32, y_pos - 32); // pos 는 해당 셀의 중점을 가르킴
-
+    Vec2 pos = new Vec2(x_pos + current_animation.size.x / 2, y_pos - current_animation.size.y / 2); // pos 는 해당 셀의 중점을 가르킴
 
     CTransform transform = new CTransform(pos, new Vec2(0, 0));
     entity.transform = transform;
@@ -180,16 +183,6 @@ class SceneMario: Scene {
   void spawn_player() {
     if(this.ps !is null) {
       auto entity = this.entities.addEntity("player");
-
-      // this.ps 에서의설정값으로Entity설정 
-      CTransform transform = new CTransform(
-					    new Vec2(this.ps.x + this.ps.cw / 2.0,
-						     this.game.wc.height - this.ps.y * this.ps.ch - this.ps.ch / 2.0),
-					    new Vec2(0, 0)
-					    );
-      CBoundingBox box = new CBoundingBox(this.ps.cw, this.ps.ch);
-      CInput input = new CInput();
-
       // Animation
       
       CAnimation animation = new CAnimation();
@@ -197,6 +190,17 @@ class SceneMario: Scene {
       animation.animations["Stand"] = this.game.am.animations["Stand"];
       animation.animations["Run"] = this.game.am.animations["Run"];
       animation.animations["Air"] = this.game.am.animations["Air"];
+      auto current_animation = animation.animations[animation.current_animation];
+
+      // this.ps 에서의설정값으로Entity설정 
+      CTransform transform = new CTransform(
+					    new Vec2(this.ps.x * 64 + current_animation.size.x / 2.0,
+						     this.game.wc.height - this.ps.y * 64 - current_animation.size.y /  2.0),
+					    new Vec2(0, 0)
+					    );
+      CBoundingBox box = new CBoundingBox(this.ps.cw, this.ps.ch);
+      CInput input = new CInput();
+
 
       entity.transform = transform;
       entity.box = box;
@@ -285,6 +289,9 @@ class SceneMario: Scene {
   }
 
   override void render() {
+     // clear screen
+    SDL_SetRenderDrawColor(this.game.renderer, 0xaf, 0xff, 0xaf, 0xff);
+    SDL_RenderClear(this.game.renderer);
     sRender();
   }
 

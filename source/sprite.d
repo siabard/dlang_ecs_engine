@@ -5,11 +5,9 @@ import bindbc.sdl;
 
 class Sprite {
   SDL_Texture* texture;
-  SDL_Rect rect;
 
-  this(SDL_Texture* texture, SDL_Rect* rect) {
+  this(SDL_Texture* texture) {
     this.texture = texture;
-    this.rect = SDL_Rect(rect.x, rect.y, rect.w, rect.h);
   }
 
   void render(SDL_Renderer* renderer, SDL_Rect *src_rect, SDL_Rect* tgt_rect, SDL_RendererFlip flip = SDL_FLIP_NONE) {

@@ -4,6 +4,7 @@ import bindbc.sdl;
 
 import types;
 import sprite;
+import std.stdio;
 
 class Animation {
   Sprite sprite;
@@ -20,9 +21,8 @@ class Animation {
     int texture_width = width / frame_count;
     int texture_height = height;
     
-    SDL_Rect animation_rect = SDL_Rect(0, 0, texture_width, texture_height);
-    this.sprite = new Sprite(texture, &animation_rect);
-    this.size = new Vec2(texture_width / frame_count, texture_height);
+    this.sprite = new Sprite(texture);
+    this.size = new Vec2(texture_width, texture_height);
     this.frame_count = frame_count;
     this.animation_speed = animation_speed;
   }

@@ -24,7 +24,9 @@ import action;
 import std.math;
 
 class Scene {
+  EntityManager entities;
   Game game;
+  string level_path;
 
   /*
     Action Map 은 SDL2의 키코드에 대하여 어떤 Action을 취할지 설정한 설정 내역이다.

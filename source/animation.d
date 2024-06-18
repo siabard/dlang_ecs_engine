@@ -11,8 +11,7 @@ class Animation {
   uint current_frame = 0;
   int animation_speed = 0; // 초당 몇 프레임?
   float elapsed_time = 0.0; // 현재 프레임 경과 시간..
-
-  Vec2 size = new Vec2(0, 0);
+  Vec2 size = new Vec2(0, 0); // 한 프레임의 크기 
 
   this(SDL_Texture* texture, uint frame_count, int animation_speed) {
     int width , height;

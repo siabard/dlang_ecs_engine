@@ -65,6 +65,8 @@ bool init_sdl() {
       writeln("NO TTF is supported");
     }
     TTF_Init();
+
+    writeln("SDL init success");
     
     return result;
 }

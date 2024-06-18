@@ -7,6 +7,7 @@ import std.algorithm.mutation;
 
 import types;
 import shape;
+import animation;
 
 alias EntityVec = Entity[];
 alias EntityMap = EntityVec[string];
@@ -121,6 +122,8 @@ class Entity {
   CInput input = null;
   CLifespan lifespan = null;
   CVertices vertices = null;
+  CAnimation animation = null;
+  CBoundingBox box = null;
 
   this(string tag, uint entity_id) {
     this.entity_id = entity_id;

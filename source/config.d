@@ -197,3 +197,27 @@ class BulletSpec {
     this.l = l;
   }
 }
+
+
+
+/*
+  MarioSpec 은 다음의 객체이다.
+  Player X Y CW CH SX SY SM GY B
+  X, Y Position       X, Y      float, float
+  BoundingBox W/H     CW, CH    float, float
+  Left/Right SPEED    SX        float, float
+  Jump Speed          SY        float
+  Gravity             GY        float
+  Bullet Animation    B         string
+*/
+class MarioSpec {
+  float x = 0.0;
+  float y = 0.0;
+  float cw = 0.0;
+  float ch = 0.0;
+  float sx = 0.0;
+  float sy = 0.0;
+  float sm = 0.0;
+  float gy = 0.0;
+  string bullet = "";
+}

@@ -9,6 +9,8 @@ import constants;
 
 import scene;
 import scene_geowar;
+import scene_mario;
+
 import config;
 
 import sdl_util;
@@ -59,11 +61,10 @@ class Game {
 
   }
 
-  void game_init(string path) {
+  void game_init(string config_path, string asset_path) {
 
     this.sdl_available = init_sdl();
-    load_config(path);
-
+    load_config(config_path);
     if(this.sdl_available) {
       SDL_Init(SDL_INIT_VIDEO);
       Mix_OpenAudio( 22_050, MIX_DEFAULT_FORMAT, 2, 4096 );
@@ -87,8 +88,12 @@ class Game {
 	}
 	SDL_SetRenderDrawBlendMode(this.renderer, SDL_BLENDMODE_BLEND);
       }
-      this.current_scene = "geowar";
-      this.scene[this.current_scene] = new SceneGeoWar(this, "./assets/config.txt");
+
+
+      load_asset(asset_path);
+
+      this.current_scene = "mario";
+      this.scene[this.current_scene] = new SceneMario(this, "./assets/level1.txt");
       this.scene[this.current_scene].scene_init();
     }
   }
@@ -114,8 +119,27 @@ class Game {
 
 	  this.wc.width = width;
 	  this.wc.height = height;
-	} else if(tokens[0].toLower() == "font") {
-	
+	}
+      }
+    }
+  }
+
+  private void load_asset(string path) {
+    File file = File(path, "r");
+    scope(exit) {
+      if(file.isOpen()) {
+	file.close();
+      }
+    }
+
+    while(!file.eof()) {
+      string line = strip(file.readln());
+      // writeln("read line -> |", line, line.length);
+
+      if(line.length > 0) {
+	string[] tokens = line.split;
+      
+	if(tokens[0].toLower() == "font") {
 	  auto font_name = tokens[1];
 	  auto font_path = tokens[2];
 	  auto font_size = to!int(tokens[3]);

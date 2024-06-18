@@ -1,23 +1,23 @@
-Texture   TexStand   resources/images/megaman/stand64.png
-Texture   TexRun     resources/images/megaman/run64.png
-Texture   TexAir     resources/images/megaman/air64.png
-Texture   TexBuster  resources/images/megaman/buster.png
-Texture   TexExplode resources/images/misc/explosion128.png
-Texture   TexCoin    resources/images/misc/coinspin.png
-Texture   TexBrick   resources/images/mario/brick.png
-Texture   TexQ       resources/images/mario/qfade.png
-Texture   TexQ2      resources/images/mario/question2.png
-Texture   TexPipeS   resources/images/mario/pipesmall.png
-Texture   TexPipeT   resources/images/mario/pipetall.png
-Texture   TexCloudB  resources/images/mario/cloudbig.png
-Texture   TexCloudS  resources/images/mario/cloudsmall.png
-Texture   TexBush    resources/images/mario/bush.png
-Texture   TexBushBig resources/images/mario/bushbig.png
-Texture   TexGround  resources/images/mario/ground.png
-Texture   TexBlock   resources/images/mario/block.png
-Texture   TexPole    resources/images/mario/flagpole.png
-Texture   TexPoleTop resources/images/mario/flagtop.png
-Texture   TexFlag    resources/images/mario/flag.png
+Texture   TexStand   assets/images/megaman/stand64.png
+Texture   TexRun     assets/images/megaman/run64.png
+Texture   TexAir     assets/images/megaman/air64.png
+Texture   TexBuster  assets/images/megaman/buster.png
+Texture   TexExplode assets/images/misc/explosion128.png
+Texture   TexCoin    assets/images/misc/coinspin.png
+Texture   TexBrick   assets/images/mario/brick.png
+Texture   TexQ       assets/images/mario/qfade.png
+Texture   TexQ2      assets/images/mario/question2.png
+Texture   TexPipeS   assets/images/mario/pipesmall.png
+Texture   TexPipeT   assets/images/mario/pipetall.png
+Texture   TexCloudB  assets/images/mario/cloudbig.png
+Texture   TexCloudS  assets/images/mario/cloudsmall.png
+Texture   TexBush    assets/images/mario/bush.png
+Texture   TexBushBig assets/images/mario/bushbig.png
+Texture   TexGround  assets/images/mario/ground.png
+Texture   TexBlock   assets/images/mario/block.png
+Texture   TexPole    assets/images/mario/flagpole.png
+Texture   TexPoleTop assets/images/mario/flagtop.png
+Texture   TexFlag    assets/images/mario/flag.png
 Animation Stand      TexStand    1    0
 Animation Run        TexRun      3   10
 Animation Air        TexAir      1    0
@@ -38,5 +38,6 @@ Animation Block      TexBlock    1    0
 Animation Flag       TexFlag     1    0
 Animation Pole       TexPole     1    0
 Animation PoleTop    TexPoleTop  1    0
-Font      Arial      resources/fonts/arial.ttf	16
-Font      Mario      resources/fonts/mario.ttf	16
+Font      Arial      assets/fonts/arial.ttf	16
+Font      Mario      assets/fonts/mario.ttf	16
+Window 1280 720

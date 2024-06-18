@@ -113,6 +113,18 @@ class CVertices {
 
 
 // Animation
-class CAnimaion {
+class CAnimation {
+  string current_animation;
   Animation[string] animations;
+}
+
+// Bounding Box
+class CBoundingBox {
+  float width = 0.0;
+  float height = 0.0;
+
+  this(float w, float h) {
+    this.width = w;
+    this.height = h;
+  }
 }

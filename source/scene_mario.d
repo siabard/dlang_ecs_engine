@@ -25,6 +25,7 @@ import physics;
 import std.math;
 import scene;
 import action;
+import animation;
 
 class SceneMario: Scene {
 
@@ -205,6 +206,7 @@ class SceneMario: Scene {
       entity.transform = transform;
       entity.box = box;
       entity.input = input;
+      entity.animation = animation;
 
       this.player = entity;
     }
@@ -300,36 +302,23 @@ class SceneMario: Scene {
     Rect world_rect = new Rect(0, 0, cast(int)this.game.wc.width, cast(int)this.game.wc.height);
     
     foreach(entity; this.entities.getEntities()) {
-      if(entity.transform !is null && entity.shape !is null) {
+      if(entity.transform !is null && entity.animation !is null) {
 	entity.transform.prev_pos.x = entity.transform.pos.x;
 	entity.transform.prev_pos.y = entity.transform.pos.y;
 	entity.transform.pos.x = entity.transform.pos.x + entity.transform.velocity.x * dt;
 	entity.transform.pos.y = entity.transform.pos.y + entity.transform.velocity.y * dt;
 
-	// 화면 경계에서 플레이어와 다른 객체는 행동이 달라진다.
-	// 플레이어는 더 이상 움직이지 않기만 하면 되지만, 다른 객체는 반사되어야함.
-	Rect entity_rect = get_bound_rect(entity.transform.pos, entity.shape.width, entity.shape.height);
+	// 플레이어는 더 이상 움직이지 않아야함.
+	Animation current_animation = entity.animation.animations[entity.animation.current_animation];
+	Rect entity_rect = get_bound_rect(entity.transform.pos, current_animation.size.x, current_animation.size.y);
 	if(!world_rect.contains(entity_rect)) {
-	  if(entity.tag != "player") {
-	    if((this.game.wc.width - entity.shape.width / 2.0) <= entity.transform.pos.x ||
-	       (entity.shape.width / 2.0) >= entity.transform.pos.x) {
-	      entity.transform.velocity.x *= -1;
-	    }
-
-	    if((this.game.wc.height - entity.shape.height / 2.0) <= entity.transform.pos.y ||
-	       (entity.shape.height / 2.0 >= entity.transform.pos.y)) {
-	      entity.transform.velocity.y *= -1;
-		      
-	    }
-	  }
-	  
 	  entity.transform.pos.x = 
-	    min(cast(float)this.game.wc.width - entity.shape.width / 2.0 + 1.0, 
-		max(entity.shape.width / 2.0 - 1.0, entity.transform.pos.x));
+	    min(cast(float)this.game.wc.width - current_animation.size.x / 2.0 + 1.0, 
+		max(current_animation.size.x / 2.0 - 1.0, entity.transform.pos.x));
 	  
 	  entity.transform.pos.y = 
-	    min(cast(float)this.game.wc.height - entity.shape.height / 2.0 + 1.0, 
-		max(entity.shape.height / 2.0 - 1.0, entity.transform.pos.y));
+	    min(cast(float)this.game.wc.height - current_animation.size.y / 2.0 + 1.0, 
+		max(current_animation.size.y / 2.0 - 1.0, entity.transform.pos.y));
 	}
       }
     }
@@ -353,13 +342,14 @@ class SceneMario: Scene {
     // W, S D, F (위, 아래, 왼쪽, 오른쪽)
     // 플레이어 이동함
 
+
     /*
     this.player.input.up = key_is_activated(this.game.key_hold, SDLK_w);
     this.player.input.down = key_is_activated(this.game.key_hold, SDLK_s);
     this.player.input.left = key_is_activated(this.game.key_hold, SDLK_a);
     this.player.input.right = key_is_activated(this.game.key_hold, SDLK_d);
     */
-
+    
     // 마우스 클릭 처리
     if(this.game.mouse.lbutton_down == true) {
       Vec2 mouse_pos = new Vec2(this.game.mouse.x, this.game.mouse.y);
@@ -491,7 +481,6 @@ class SceneMario: Scene {
   void sUserInput() {
     // 플레이어 이동 데이터 생성
     Vec2 vel = new Vec2();
-
     if(this.player !is null && this.player.input !is null && this.player.transform !is null && this.player.input.left) {
       vel.x -= this.ps.sx;
     }
@@ -506,8 +495,8 @@ class SceneMario: Scene {
   void sRender() {
     // Shape 이 있는 항목에 대한 그림 그리기 (사각형)
     foreach(entity; this.entities.getEntities()) {
+
       if(entity.transform !is null && entity.animation !is null) {
-	
 	ubyte alpha = 0xff;
 	if(entity.lifespan !is null) {
 	  alpha = cast(ubyte)((cast(float)alpha) * (entity.lifespan.total - entity.lifespan.duration) / entity.lifespan.total);

@@ -128,10 +128,9 @@ class SceneMario: Scene {
       }
     }
 
-    register_action(SDLK_w, "UP");
-    register_action(SDLK_s, "DOWN");
     register_action(SDLK_a, "LEFT");
     register_action(SDLK_d, "RIGHT");
+    register_action(SDLK_w, "JUMP");
 
     spawn_player();
   }
@@ -271,106 +270,6 @@ class SceneMario: Scene {
 
   }
 
-
-  override void update(float dt) {
-    sKeyMouseEvent();
-    sUserInput();
-    sLifespan(dt);
-    sGravity(dt);
-    sMovement(dt);
-    sCollision();
-    sEnemySpawner(dt);
-    this.entities.update();   
-  }
-
-  void sLifespan(float dt) {
-    foreach(entity; this.entities.getEntities()) {
-      if(entity.lifespan !is null) {
-	entity.lifespan.duration += dt;
-
-	if(entity.lifespan.duration >= entity.lifespan.total) {
-	  entity.destroy();
-	}
-      }
-    }
-  }
-
-  override void render() {
-     // clear screen
-    SDL_SetRenderDrawColor(this.game.renderer, 0xaf, 0xff, 0xaf, 0xff);
-    SDL_RenderClear(this.game.renderer);
-    sRender();
-  }
-
-  // systems
-  void sMovement(float dt) {
-    Rect world_rect = new Rect(0, 0, cast(int)this.game.wc.width, cast(int)this.game.wc.height);
-    
-    foreach(entity; this.entities.getEntities()) {
-      if(entity.transform !is null && entity.animation !is null) {
-	entity.transform.prev_pos.x = entity.transform.pos.x;
-	entity.transform.prev_pos.y = entity.transform.pos.y;
-	entity.transform.pos.x = entity.transform.pos.x + entity.transform.velocity.x * dt;
-	entity.transform.pos.y = entity.transform.pos.y + entity.transform.velocity.y * dt;
-
-	// 플레이어는 더 이상 움직이지 않아야함.
-	Animation current_animation = entity.animation.animations[entity.animation.current_animation];
-	Rect entity_rect = get_bound_rect(entity.transform.pos, current_animation.size.x, current_animation.size.y);
-	if(!world_rect.contains(entity_rect)) {
-	  entity.transform.pos.x = 
-	    min(cast(float)this.game.wc.width - current_animation.size.x / 2.0 + 1.0, 
-		max(current_animation.size.x / 2.0 - 1.0, entity.transform.pos.x));
-	  
-	  entity.transform.pos.y = 
-	    min(cast(float)this.game.wc.height - current_animation.size.y / 2.0 + 1.0, 
-		max(current_animation.size.y / 2.0 - 1.0, entity.transform.pos.y));
-	}
-      }
-    }
-  }
-
-  unittest {
-    import std.stdio;
-
-    writeln("movement system");
-    
-    Rect entity_rect = get_bound_rect(new Vec2(80, 80), 200, 25);
-    Rect world_rect = new Rect(0, 0, 1280, 720);
-    
-    assert(!world_rect.contains(entity_rect));
-    assert("enemy" != "player");
-    writeln(min(1280 - 100, max(100, 80)));
-    writeln("movement system end");
-  }
-
-  void sKeyMouseEvent() {
-    // W, S D, F (위, 아래, 왼쪽, 오른쪽)
-    // 플레이어 이동함
-
-
-    /*
-    this.player.input.up = key_is_activated(this.game.key_hold, SDLK_w);
-    this.player.input.down = key_is_activated(this.game.key_hold, SDLK_s);
-    this.player.input.left = key_is_activated(this.game.key_hold, SDLK_a);
-    this.player.input.right = key_is_activated(this.game.key_hold, SDLK_d);
-    */
-    
-    // 마우스 클릭 처리
-    if(this.game.mouse.lbutton_down == true) {
-      Vec2 mouse_pos = new Vec2(this.game.mouse.x, this.game.mouse.y);
-      // 현재 플레이어 위치에서 mouse_pos 까지의 각도 계산
-      Vec2 difference = mouse_pos - this.player.transform.pos;
-      Vec2 speed = difference.normalize();
-
-      spawn_bullet(this.player.transform.pos, speed);
-    }
-
-    if(this.game.mouse.rbutton_down == true) {
-      spawn_special_bullets(this.player.transform.pos);
-    }
-  }
-
-  
   void spawn_special_bullets(Vec2 pos) {
     if(this.es !is null && this.bs !is null) {
       float speed = this.bs.s;
@@ -483,18 +382,126 @@ class SceneMario: Scene {
     }
   }
 
+  override void update(float dt) {
+    sKeyMouseEvent();
+    sUserInput();
+    sLifespan(dt);
+    sGravity(dt);
+    sMovement(dt);
+    sAnimation(dt);
+    sCollision();
+    sEnemySpawner(dt);
+    this.entities.update();   
+  }
+
+
+  override void render() {
+     // clear screen
+    SDL_SetRenderDrawColor(this.game.renderer, 0xaf, 0xff, 0xaf, 0xff);
+    SDL_RenderClear(this.game.renderer);
+    sRender();
+  }
+
+  // systems
+  void sMovement(float dt) {
+    Rect world_rect = new Rect(0, 0, cast(int)this.game.wc.width, cast(int)this.game.wc.height);
+    
+    foreach(entity; this.entities.getEntities()) {
+      if(entity.transform !is null && entity.animation !is null) {
+	entity.transform.prev_pos.x = entity.transform.pos.x;
+	entity.transform.prev_pos.y = entity.transform.pos.y;
+	entity.transform.pos.x = entity.transform.pos.x + entity.transform.velocity.x * dt;
+	entity.transform.pos.y = entity.transform.pos.y + entity.transform.velocity.y * dt;
+
+	// 플레이어는 더 이상 움직이지 않아야함.
+	Animation current_animation = entity.animation.animations[entity.animation.current_animation];
+	Rect entity_rect = get_bound_rect(entity.transform.pos, current_animation.size.x, current_animation.size.y);
+	if(!world_rect.contains(entity_rect)) {
+	  entity.transform.pos.x = 
+	    min(cast(float)this.game.wc.width - current_animation.size.x / 2.0 + 1.0, 
+		max(current_animation.size.x / 2.0 - 1.0, entity.transform.pos.x));
+	  
+	  entity.transform.pos.y = 
+	    min(cast(float)this.game.wc.height - current_animation.size.y / 2.0 + 1.0, 
+		max(current_animation.size.y / 2.0 - 1.0, entity.transform.pos.y));
+	}
+      }
+    }
+  }
+
+  void sKeyMouseEvent() {
+    // W, S D, F (위, 아래, 왼쪽, 오른쪽)
+    // 플레이어 이동함
+
+
+    /*
+    this.player.input.up = key_is_activated(this.game.key_hold, SDLK_w);
+    this.player.input.down = key_is_activated(this.game.key_hold, SDLK_s);
+    this.player.input.left = key_is_activated(this.game.key_hold, SDLK_a);
+    this.player.input.right = key_is_activated(this.game.key_hold, SDLK_d);
+    */
+    
+    // 마우스 클릭 처리
+    if(this.game.mouse.lbutton_down == true) {
+      Vec2 mouse_pos = new Vec2(this.game.mouse.x, this.game.mouse.y);
+      // 현재 플레이어 위치에서 mouse_pos 까지의 각도 계산
+      Vec2 difference = mouse_pos - this.player.transform.pos;
+      Vec2 speed = difference.normalize();
+
+      spawn_bullet(this.player.transform.pos, speed);
+    }
+
+    if(this.game.mouse.rbutton_down == true) {
+      spawn_special_bullets(this.player.transform.pos);
+    }
+  }
+
+  void sLifespan(float dt) {
+    foreach(entity; this.entities.getEntities()) {
+      if(entity.lifespan !is null) {
+	entity.lifespan.duration += dt;
+
+	if(entity.lifespan.duration >= entity.lifespan.total) {
+	  entity.destroy();
+	}
+      }
+    }
+  }
+
+  void sAnimation(float dt) {
+    writeln("dt => ", dt);
+    foreach(entity; this.entities.getEntities()) {
+      if(entity.animation !is null) {
+	Animation current_animation = entity.animation.animations[entity.animation.current_animation];
+	current_animation.update(dt);
+      }
+    }
+  }
+  
   void sUserInput() {
     // Player 이동 데이터 생성
-    Vec2 vel = new Vec2();
     if(this.player !is null && this.player.input !is null && this.player.transform !is null && this.player.input.left) {
-      vel.x -= this.ps.sm;
+      this.player.transform.velocity.x -= this.ps.sx;
     }
 
     if(this.player !is null && this.player.input !is null && this.player.transform !is null && this.player.input.right) {
-      vel.x += this.ps.sm;
+      this.player.transform.velocity.x += this.ps.sx;
     }
 
-    this.player.transform.velocity = vel.normalize() * this.ps.sx;
+    if(this.player.transform.velocity.x < -this.ps.sm) {
+      this.player.transform.velocity.x = -this.ps.sm;
+    } else if(this.player.transform.velocity.x > this.ps.sm) {
+      this.player.transform.velocity.x = this.ps.sm;
+    }
+
+    if(!abs(this.player.transform.velocity.y).isClose(0.0)) {
+      this.player.animation.current_animation = "Air";
+    } else if(abs(this.player.transform.velocity.x).isClose(0.0)) {
+      this.player.animation.current_animation = "Stand";
+    } else {
+      this.player.animation.current_animation = "Run";
+    }
+
     Animation current_animation = this.player.animation.animations[this.player.animation.current_animation];
 
     if(this.player.transform.velocity.x < 0 && current_animation.flip_h == SDL_FLIP_NONE) {
@@ -584,5 +591,17 @@ class SceneMario: Scene {
     } 
   } // end of sAction
 
+  unittest {
+    import std.stdio;
 
+    writeln("movement system");
+    
+    Rect entity_rect = get_bound_rect(new Vec2(80, 80), 200, 25);
+    Rect world_rect = new Rect(0, 0, 1280, 720);
+    
+    assert(!world_rect.contains(entity_rect));
+    assert("enemy" != "player");
+    writeln(min(1280 - 100, max(100, 80)));
+    writeln("movement system end");
+  }
 } // End of Class Scene

@@ -8,8 +8,8 @@ import std.stdio;
 
 class Animation {
   Sprite sprite;
-  uint frame_count = 0;
-  uint current_frame = 0;
+  uint frame_count = 0; // 프레임 총수
+  uint current_frame = 0; // 현재 프레임 번호
   int animation_speed = 0; // 초당 몇 프레임?
   float elapsed_time = 0.0; // 현재 프레임 경과 시간..
   Vec2 size = new Vec2(0, 0); // 한 프레임의 크기 
@@ -29,8 +29,12 @@ class Animation {
   }
 
   void update(float dt) {
+    if(this.frame_count == 0) {
+      return;
+    }
+
     this.elapsed_time += dt;
-    float fixed_time = 1000.0 / cast(float)this.animation_speed;
+    float fixed_time = 1.0 / cast(float)this.animation_speed;
     
     if(this.elapsed_time >= fixed_time) {
       this.current_frame = (this.current_frame + 1) % this.frame_count;

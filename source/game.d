@@ -248,7 +248,7 @@ class Game {
     while(!this.ended) {
       this.current_time = SDL_GetTicks();
 
-      float dt = cast(float)(this.current_time - this.last_time) / 50.0;
+      float dt = cast(float)(this.current_time - this.last_time) / 1000.0;
       this.event_loop();
 
       if((SDLK_ESCAPE in this.key_pressed) !is null 

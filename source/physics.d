@@ -72,7 +72,7 @@ Vec2 entity_overlap_amount(Entity src, Entity opponent) {
   Vec2 src_size = src.animation.animations[src.animation.current_animation].size;
 
   Vec2 opp_pos = opponent.transform.pos;
-  Vec2 opp_size = opponent.animation.animations[src.animation.current_animation].size;
+  Vec2 opp_size = opponent.animation.animations[opponent.animation.current_animation].size;
 
   Rect src_rect = get_bound_rect(pos, src_size.x, src_size.y);
   Rect opp_rect = get_bound_rect(opp_pos, opp_size.x, opp_size.y);
@@ -90,7 +90,7 @@ Vec2 entity_prev_overlap_amount(Entity src, Entity opponent) {
   Vec2 src_size = src.animation.animations[src.animation.current_animation].size;
 
   Vec2 opp_pos = opponent.transform.pos;
-  Vec2 opp_size = opponent.animation.animations[src.animation.current_animation].size;
+  Vec2 opp_size = opponent.animation.animations[opponent.animation.current_animation].size;
 
   Rect src_prev_rect = get_bound_rect(old_pos, src_size.x, src_size.y);
   Rect opp_rect = get_bound_rect(opp_pos, opp_size.x, opp_size.y);

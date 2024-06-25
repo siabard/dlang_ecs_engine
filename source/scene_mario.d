@@ -387,9 +387,9 @@ class SceneMario: Scene {
     sUserInput();
     sLifespan(dt);
     sGravity(dt);
+    sCollision();
     sMovement(dt);
     sAnimation(dt);
-    sCollision();
     sEnemySpawner(dt);
     this.entities.update();   
   }
@@ -564,6 +564,20 @@ class SceneMario: Scene {
   }
 
   void sCollision() {
+    foreach(entity; this.entities.getEntities("tile")) {
+      auto ovlp_dir = overlap_direction(this.player, entity);
+
+      if(ovlp_dir != OVERLAP_DIRECTION.NONE) {
+	// 아래에 부딪히면..
+	if(ovlp_dir == OVERLAP_DIRECTION.DOWN && this.player.transform.velocity.y > 0 
+	   || ovlp_dir == OVERLAP_DIRECTION.UP && this.player.transform.velocity.y < 0) {
+	  this.player.transform.velocity.y = 0;
+	} else if(ovlp_dir == OVERLAP_DIRECTION.LEFT && this.player.transform.velocity.x < 0 
+		  || ovlp_dir == OVERLAP_DIRECTION.RIGHT && this.player.transform.velocity.x > 0){
+	  this.player.transform.velocity.x = 0;
+	}
+      }
+    }
   }
 
   override void sAction(Action action) {

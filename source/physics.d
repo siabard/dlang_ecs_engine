@@ -3,6 +3,13 @@ module physics;
 import types;
 import std.math.operations;
 import std.math;
+import shape;
+
+import entity;
+
+enum OVERLAP_DIRECTION {
+  UP, DOWN, LEFT, RIGHT, NONE
+}
 
 // circle collisions
 // C1(x, y1, r1)과 C2(x2, y2, r2)가 collide 하는가?
@@ -42,6 +49,8 @@ bool is_overlap(float w1, float w2, float d) {
 }
 
 Vec2 overlap_amount(Rect r1, Rect r2) {
+  // x가 0보다 크면 가로로 겹친다
+  // y가 0보다 크면 세로로 겹친다
   Vec2 c1 = new Vec2(r1.x + r1.w / 2, r1.y + r1.h / 2);
   Vec2 c2 = new Vec2(r2.x + r2.w / 2, r2.y + r2.h / 2);
 
@@ -55,11 +64,82 @@ Vec2 overlap_amount(Rect r1, Rect r2) {
   return new Vec2(ox, oy);
 }
 
+Vec2 entity_overlap_amount(Entity src, Entity opponent) {
+  Vec2 ovlp = new Vec2(0, 0);
+  
+  Vec2 pos = src.transform.pos;
+  
+  Vec2 src_size = src.animation.animations[src.animation.current_animation].size;
+
+  Vec2 opp_pos = opponent.transform.pos;
+  Vec2 opp_size = opponent.animation.animations[src.animation.current_animation].size;
+
+  Rect src_rect = get_bound_rect(pos, src_size.x, src_size.y);
+  Rect opp_rect = get_bound_rect(opp_pos, opp_size.x, opp_size.y);
+
+  ovlp = overlap_amount(src_rect, opp_rect);
+
+  return ovlp;
+}
+
+Vec2 entity_prev_overlap_amount(Entity src, Entity opponent) {
+  Vec2 ovlp = new Vec2(0, 0);
+  
+  Vec2 old_pos = src.transform.prev_pos;
+  
+  Vec2 src_size = src.animation.animations[src.animation.current_animation].size;
+
+  Vec2 opp_pos = opponent.transform.pos;
+  Vec2 opp_size = opponent.animation.animations[src.animation.current_animation].size;
+
+  Rect src_prev_rect = get_bound_rect(old_pos, src_size.x, src_size.y);
+  Rect opp_rect = get_bound_rect(opp_pos, opp_size.x, opp_size.y);
+
+  ovlp = overlap_amount(src_prev_rect, opp_rect);
+
+  return ovlp;
+}
+
+OVERLAP_DIRECTION overlap_direction(Entity src, Entity opponent) {
+  Vec2 ovlp = entity_overlap_amount(src, opponent);
+  Vec2 ovlp_prev = entity_prev_overlap_amount(src, opponent);
+  
+  Vec2 pos = src.transform.pos;
+  Vec2 old_pos = src.transform.prev_pos;
+
+  Vec2 opp_pos = opponent.transform.pos;
+
+  // x축 y축 모두 겹쳐야 판단함
+  if(ovlp.x > 0 && ovlp.y > 0) {
+    // ovlp 값을 보고 훨씬 큰 값을 가진쪽으로 한다.
+    if(ovlp.x > ovlp.y) {
+      // y축인데 이 때 위인지 아래인지 결정
+      // old_pos.y 가 pos.y 보다 크면 위가 부딪힌 것
+      if(old_pos.y > pos.y) {
+	return OVERLAP_DIRECTION.UP;
+      } else {
+	return OVERLAP_DIRECTION.DOWN;
+      }
+    } else {
+      // x 축일 때 이 때 왼쪽인지 오른쪽인지 결정
+      // old_pos.x 가 pos.x 보다 크면 왼쪽이 부딪힌 것
+      if(old_pos.x > pos.x) {
+	return OVERLAP_DIRECTION.LEFT;
+      } else {
+	return OVERLAP_DIRECTION.RIGHT;
+      }
+    }
+  } else {
+    return OVERLAP_DIRECTION.NONE;
+  }
+  
+}
+
 unittest {
   import std.stdio;
   import shape;
 
-  writeln("TEST OVERLAPPING");
+  writeln("***** TEST OVERLAPPING *****");
 
   Vec2 pos1 = new Vec2(20, 20);
   Vec2 pos2 = new Vec2(55, 25);
@@ -81,6 +161,74 @@ unittest {
   writeln("OVLP NEW ", new_ovlp.x, " , ", new_ovlp.y);
   writeln("OVLP NEW2 ", new_ovlp2.x, " , ", new_ovlp2.y);
 
-  writeln("TEST OVERLAPPING END");
+  writeln("***** TEST OVERLAPPING END *****");
   
 }
+
+unittest {
+  import std.stdio;
+  import shape;
+  import component;
+  import animation;
+
+  Vec2 player_pos = new Vec2(0, 20);
+  Vec2 player_pos_right_moved = new Vec2(25, 20);
+  Vec2 collider_pos = new Vec2(60, 20);
+  float width = 40;
+  float height = 30;
+
+  writeln("**** TEST OVERLAPPING DIRECTION ***");
+  
+  Entity player = new Entity();
+  Animation anim = new Animation();
+  CAnimation canimation = new CAnimation();
+  anim.size = new Vec2(40, 30);
+  canimation.animations["DEFAULT"] = anim;
+  canimation.current_animation = "DEFAULT";
+
+  player.transform = new CTransform(player_pos_right_moved, new Vec2(0, 0));
+  player.transform.prev_pos = player_pos;
+  player.animation = canimation;
+
+  Entity block = new Entity();
+  Animation block_anim = new Animation();
+  CAnimation cblock_anim= new CAnimation();
+  block_anim.size = new Vec2(40, 30);
+  cblock_anim.animations["DEFAULT"] = block_anim;
+  cblock_anim.current_animation = "DEFAULT";
+  block.animation = cblock_anim;
+  block.transform = new CTransform(collider_pos, new Vec2(0, 0));
+
+  Rect player_rect = get_bound_rect(player_pos, width, height);
+  Rect player_right_moved_rect = get_bound_rect(player_pos_right_moved, width, height);
+  Rect collider_rect = get_bound_rect(collider_pos, width, height);
+
+  // colliding 검사
+  Vec2 ovlp = overlap_amount(player_rect, collider_rect);
+  Vec2 ovlp_moved = overlap_amount(player_right_moved_rect, collider_rect);
+
+  writeln("olvp : x " , ovlp.x , " , ovlp. : y " , ovlp.y);
+  writeln("olvp moved : x " , ovlp_moved.x , " , ovlp moved : y " , ovlp_moved.y);
+  assert(ovlp.x <= 0 || ovlp.y <= 0); // 겹침 없음
+  assert(ovlp_moved.x > 0 && ovlp_moved.y > 0); // 겹침 있음
+
+
+  Vec2 ovlp_entity = entity_overlap_amount(player, block);
+  Vec2 ovlp_prev_entity = entity_prev_overlap_amount(player, block);
+  writeln("ovlp entity : x ", ovlp_entity.x , " , " , ovlp_entity.y);
+  writeln("ovlp prev entity : x ", ovlp_prev_entity.x , " , " , ovlp_prev_entity.y);
+
+  // 플레이어가 오른족으로 이동했을 때 검사
+  // x가 0에서 25로 움직였음
+  // 그러니 오른쪽으로 부딪혀야함.
+  // 이 때 현재 ovlp_entity 가 겹친상태(x, y가 다 0 이 넘을 것)인데
+  // 이전 상태에서는 x 가 음수값이어야 하며 (x 축으로 겹침발생)
+  // 이전 포지션이 현재 포지션보다 작아야함.
+  auto direction = overlap_direction(player, block);
+  writeln(direction);
+
+  
+  
+  writeln("**** TEST OVERLAPPING DIRECTION ENDED ***");
+}
+

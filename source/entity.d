@@ -87,9 +87,7 @@ class EntityManager {
     assert(em.entities[1].entity_id == 1);
 
     // transform 설정
-    e1.transform = new CTransform();
-    e1.transform.pos = new Vec2(120, 10);
-    e1.transform.velocity = new Vec2(2, 2);
+    e1.transform = new CTransform(new Vec2(120, 10), new Vec2(2, 2));
     e1.transform.pos += e1.transform.velocity;
     
     assert(em.entities[0].transform.pos.x == 122);
@@ -125,6 +123,8 @@ class Entity {
   CAnimation animation = null;
   CBoundingBox box = null;
   CGravity gravity = null;
+  
+  this() {}
 
   this(string tag, uint entity_id) {
     this.entity_id = entity_id;
@@ -136,3 +136,4 @@ class Entity {
     this.is_alive = false;
   }
 }
+

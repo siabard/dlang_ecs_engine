@@ -15,6 +15,8 @@ class Animation {
   Vec2 size = new Vec2(0, 0); // 한 프레임의 크기 
   SDL_RendererFlip flip_h = SDL_FLIP_NONE;
 
+  this() {}
+
   this(SDL_Texture* texture, uint frame_count, int animation_speed) {
     int width , height;
     SDL_QueryTexture(texture, null, null, &width, &height);

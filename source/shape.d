@@ -217,6 +217,7 @@ void render_circle(SDL_Renderer* renderer, Circle circ) {
 }
 
 
+// pos 를 중점에 둔 가로 width, 세로 height 사각형
 Rect get_bound_rect(Vec2 pos, float width, float height) {
   return new Rect(
 		  cast(int)(pos.x - width / 2.0),

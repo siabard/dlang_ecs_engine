@@ -35,6 +35,8 @@ class SceneMario: Scene {
   EnemySpec es;
   BulletSpec bs;
 
+  bool collision_mode = false;
+
   this(Game game, string level_path) {
     super(game);
     this.entities = new EntityManager();
@@ -131,6 +133,7 @@ class SceneMario: Scene {
     register_action(SDLK_a, "LEFT");
     register_action(SDLK_d, "RIGHT");
     register_action(SDLK_w, "JUMP");
+    register_action(SDLK_c, "COLLISION");
 
     spawn_player();
   }
@@ -281,32 +284,32 @@ class SceneMario: Scene {
 	auto entity = this.entities.addEntity("bullet");
       
       
-      // this.es 에서의 설정을 가져옴
-      CShape shape = new CShape(
-				this.bs.sr * 2.0 / 4.0,
-				this.bs.sr * 2.0 / 4.0,
-				this.bs.fr,
-				this.bs.fg,
-				this.bs.fb,
-				this.bs.or,
-				this.bs.og,
-				this.bs.ob,
-				this.bs.ot
-				);
+	// this.es 에서의 설정을 가져옴
+	CShape shape = new CShape(
+				  this.bs.sr * 2.0 / 4.0,
+				  this.bs.sr * 2.0 / 4.0,
+				  this.bs.fr,
+				  this.bs.fg,
+				  this.bs.fb,
+				  this.bs.or,
+				  this.bs.og,
+				  this.bs.ob,
+				  this.bs.ot
+				  );
 
       
-      CTransform transform = new CTransform(
-					    new Vec2(pos.x, pos.y), 
-					    (new Vec2(cos(unit_theta * i) * speed,
-						      sin(unit_theta * i) * speed)) 
-					    );
-      CCollision collision = new CCollision(this.bs.cr / 4.0);
+	CTransform transform = new CTransform(
+					      new Vec2(pos.x, pos.y), 
+					      (new Vec2(cos(unit_theta * i) * speed,
+							sin(unit_theta * i) * speed)) 
+					      );
+	CCollision collision = new CCollision(this.bs.cr / 4.0);
       
-      CLifespan lifespan = new CLifespan(this.bs.l / 5.0);
-      entity.lifespan = lifespan;
-      entity.shape = shape;
-      entity.transform = transform;
-      entity.collision = collision;
+	CLifespan lifespan = new CLifespan(this.bs.l / 5.0);
+	entity.lifespan = lifespan;
+	entity.shape = shape;
+	entity.transform = transform;
+	entity.collision = collision;
       }
       
     }
@@ -335,7 +338,7 @@ class SceneMario: Scene {
 					    
 					    new Vec2(pos.x, pos.y), 
 					    (new Vec2(speed.x,
-						     speed.y)) * this.bs.s
+						      speed.y)) * this.bs.s
 					    );
       CCollision collision = new CCollision(this.bs.cr);
       
@@ -362,16 +365,16 @@ class SceneMario: Scene {
 	
 	auto part = this.entities.addEntity("enemy");
 	CShape shape = new CShape(
-				this.es.sr / 2.0,
-				this.es.sr  / 2.0,
-				0,
-				0,
-				0,
-				this.es.or,
-				this.es.og,
-				this.es.ob,
-				this.es.ot
-				);
+				  this.es.sr / 2.0,
+				  this.es.sr  / 2.0,
+				  0,
+				  0,
+				  0,
+				  this.es.or,
+				  this.es.og,
+				  this.es.ob,
+				  this.es.ot
+				  );
 	CCollision collision = new CCollision(this.es.cr / 2.0);
 	part.transform = new CTransform(entity.transform.pos, vec);
 	part.lifespan = lifespan;
@@ -396,7 +399,7 @@ class SceneMario: Scene {
 
 
   override void render() {
-     // clear screen
+    // clear screen
     SDL_SetRenderDrawColor(this.game.renderer, 0xaf, 0xff, 0xaf, 0xff);
     SDL_RenderClear(this.game.renderer);
     sRender();
@@ -412,20 +415,22 @@ class SceneMario: Scene {
 	entity.transform.prev_pos.y = entity.transform.pos.y;
 	entity.transform.pos.x = entity.transform.pos.x + entity.transform.velocity.x * dt;
 	entity.transform.pos.y = entity.transform.pos.y + entity.transform.velocity.y * dt;
-
-	// 플레이어는 더 이상 움직이지 않아야함.
-	Animation current_animation = entity.animation.animations[entity.animation.current_animation];
-	Rect entity_rect = get_bound_rect(entity.transform.pos, current_animation.size.x, current_animation.size.y);
-	if(!world_rect.contains(entity_rect)) {
-	  entity.transform.pos.x = 
-	    min(cast(float)this.game.wc.width - current_animation.size.x / 2.0 + 1.0, 
-		max(current_animation.size.x / 2.0 - 1.0, entity.transform.pos.x));
-	  
-	  entity.transform.pos.y = 
-	    min(cast(float)this.game.wc.height - current_animation.size.y / 2.0 + 1.0, 
-		max(current_animation.size.y / 2.0 - 1.0, entity.transform.pos.y));
-	}
       }
+    }
+    
+    auto entity = this.player;
+
+    // 플레이어는 더 이상 움직이지 않아야함.
+    Animation current_animation = entity.animation.animations[entity.animation.current_animation];
+    Rect entity_rect = get_bound_rect(entity.transform.pos, current_animation.size.x, current_animation.size.y);
+    if(!world_rect.contains(entity_rect)) {
+      entity.transform.pos.x = 
+	min(cast(float)this.game.wc.width - current_animation.size.x / 2.0 + 1.0, 
+	    max(current_animation.size.x / 2.0 - 1.0, entity.transform.pos.x));
+      
+      entity.transform.pos.y = 
+	min(cast(float)this.game.wc.height - current_animation.size.y / 2.0 + 1.0, 
+	    max(current_animation.size.y / 2.0 - 1.0, entity.transform.pos.y));
     }
   }
 
@@ -435,10 +440,10 @@ class SceneMario: Scene {
 
 
     /*
-    this.player.input.up = key_is_activated(this.game.key_hold, SDLK_w);
-    this.player.input.down = key_is_activated(this.game.key_hold, SDLK_s);
-    this.player.input.left = key_is_activated(this.game.key_hold, SDLK_a);
-    this.player.input.right = key_is_activated(this.game.key_hold, SDLK_d);
+      this.player.input.up = key_is_activated(this.game.key_hold, SDLK_w);
+      this.player.input.down = key_is_activated(this.game.key_hold, SDLK_s);
+      this.player.input.left = key_is_activated(this.game.key_hold, SDLK_a);
+      this.player.input.right = key_is_activated(this.game.key_hold, SDLK_d);
     */
     
     // 마우스 클릭 처리
@@ -469,7 +474,6 @@ class SceneMario: Scene {
   }
 
   void sAnimation(float dt) {
-    writeln("dt => ", dt);
     foreach(entity; this.entities.getEntities()) {
       if(entity.animation !is null) {
 	Animation current_animation = entity.animation.animations[entity.animation.current_animation];
@@ -538,16 +542,25 @@ class SceneMario: Scene {
 	
 	// 위치 정하기
 	Vec2 pos = entity.transform.pos;
-	// 노출할 애니메이션
-	auto current_animation = entity.animation.animations[entity.animation.current_animation];
 
-	// 애니메이션의 폭
-	Vec2 size = current_animation.size;
+	if(this.collision_mode) {
+	  if(entity.box !is null) {
+	    Rect local_bound = get_bound_rect(pos, entity.box.width, entity.box.height);
+	    SDL_SetRenderDrawColor(this.game.renderer, 255, 255, 255, 255);
+	    SDL_RenderDrawRect(this.game.renderer, new SDL_Rect(local_bound.x, local_bound.y, local_bound.w, local_bound.h));
+	  }
+	} else {
+	  // 노출할 애니메이션
+	  auto current_animation = entity.animation.animations[entity.animation.current_animation];
+
+	  // 애니메이션의 폭
+	  Vec2 size = current_animation.size;
 	
-	Rect local_bound = get_bound_rect(pos, size.x, size.y);
-	SDL_Rect* tgt_rect = new SDL_Rect(local_bound.x, local_bound.y, local_bound.w, local_bound.h);
+	  Rect local_bound = get_bound_rect(pos, size.x, size.y);
+	  SDL_Rect* tgt_rect = new SDL_Rect(local_bound.x, local_bound.y, local_bound.w, local_bound.h);
 
-	entity.animation.animations[entity.animation.current_animation].render(this.game.renderer, tgt_rect);
+	  entity.animation.animations[entity.animation.current_animation].render(this.game.renderer, tgt_rect);
+	}
       }
     }
   }
@@ -569,11 +582,11 @@ class SceneMario: Scene {
 
       if(ovlp_dir != OVERLAP_DIRECTION.NONE) {
 	// 아래에 부딪히면..
-	if(ovlp_dir == OVERLAP_DIRECTION.DOWN && this.player.transform.velocity.y > 0 
-	   || ovlp_dir == OVERLAP_DIRECTION.UP && this.player.transform.velocity.y < 0) {
+	if((ovlp_dir == OVERLAP_DIRECTION.DOWN && this.player.transform.velocity.y > 0)
+	   || (ovlp_dir == OVERLAP_DIRECTION.UP && this.player.transform.velocity.y < 0)) {
 	  this.player.transform.velocity.y = 0;
-	} else if(ovlp_dir == OVERLAP_DIRECTION.LEFT && this.player.transform.velocity.x < 0 
-		  || ovlp_dir == OVERLAP_DIRECTION.RIGHT && this.player.transform.velocity.x > 0){
+	} else if((ovlp_dir == OVERLAP_DIRECTION.LEFT && this.player.transform.velocity.x < 0) 
+		  || (ovlp_dir == OVERLAP_DIRECTION.RIGHT && this.player.transform.velocity.x > 0)){
 	  this.player.transform.velocity.x = 0;
 	}
       }
@@ -600,8 +613,9 @@ class SceneMario: Scene {
 	this.player.input.left = false;
       } else if(action.m_name == "RIGHT") {
 	this.player.input.right = false;
+      } else if(action.m_name == "COLLISION") {
+	this.collision_mode = !this.collision_mode;
       }
-      
     } 
   } // end of sAction
 

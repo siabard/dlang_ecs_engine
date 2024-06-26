@@ -158,7 +158,7 @@ class SceneMario: Scene {
     entity.transform = transform;
 
     // Collision 설정
-    CBoundingBox box = new CBoundingBox(64, 64);
+    CBoundingBox box = new CBoundingBox(current_animation.size.x, current_animation.size.y);
     entity.box = box;
 
   }

@@ -42,4 +42,4 @@ Tile Pole 27 6
 Tile Pole 27 7
 Tile Flag 26.5 7
 Tile PoleTop 27 8
-Player 2 6 48 48 50 400 400 9.8 Buster
+Player 2 6 48 48 50 500 400 9.8 Buster

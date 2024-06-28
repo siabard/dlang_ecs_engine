@@ -521,9 +521,8 @@ class SceneMario: Scene {
       if(entity.transform !is null && entity.gravity !is null) {
 	float y_acc = entity.transform.velocity.y;
 
-	y_acc += entity.gravity.gravity * dt;
-
-	entity.transform.velocity.y = max(this.ps.sm, y_acc);
+	y_acc += entity.gravity.gravity * 2;
+	entity.transform.velocity.y = min(this.ps.sm, y_acc);
       }
     }
   }
@@ -585,7 +584,6 @@ class SceneMario: Scene {
   }
 
   void sCollision() {
-    writeln("current player x ", this.player.transform.pos.x);
     foreach(entity; this.entities.getEntities("tile")) {
       auto ovlp_dir = overlap_direction(this.player, entity);
 
@@ -595,12 +593,16 @@ class SceneMario: Scene {
 	if(ovlp_dir == OVERLAP_DIRECTION.DOWN && this.player.transform.velocity.y > 0) {
 	  // 아래에 부딪히면..
 	  // 부딪힌 y좌표만큼 위로 올린다.
-	  this.player.transform.velocity.y = 0;
+	  // 속도는 올라갈 수는 있으니 0보다는 작을 수 있다.
+	  this.player.transform.velocity.y = 
+	    min(this.player.transform.velocity.y, 0);
 	  this.player.transform.pos.y -= ovlp.y;
 	} else  if (ovlp_dir == OVERLAP_DIRECTION.UP && this.player.transform.velocity.y < 0) {
 	  // 위에 부딪히면..
 	  // 부딪힌 y거리만큼 아래로 내린다.
-	   this.player.transform.velocity.y = 0;
+	  // 속도는 떨어질 수는 있으니 0보다 클 수 있다.
+	   this.player.transform.velocity.y = 
+	     max(this.player.transform.velocity.y, 0);
 	   this.player.transform.pos.y += ovlp.y;
 	} else if(ovlp_dir == OVERLAP_DIRECTION.LEFT && this.player.transform.velocity.x < 0) {
 	  // 왼쪽으로 부딪히면..
@@ -628,6 +630,10 @@ class SceneMario: Scene {
 	this.player.input.left = true;
       } else if(action.m_name == "RIGHT") {
 	this.player.input.right = true;
+      } else if(action.m_name == "JUMP") {
+	if(this.player.transform.velocity.y.isClose(0)) {
+	  this.player.transform.velocity.y = -this.ps.sy;
+	}
       }
     } else if (action.m_type == "END") {
       if(action.m_name == "UP") {

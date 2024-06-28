@@ -431,6 +431,12 @@ class SceneMario: Scene {
 	min(cast(float)this.game.wc.height - current_animation.size.y / 2.0 + 1.0,
 	    max(current_animation.size.y / 2.0 - 1.0, entity.transform.pos.y));
     }
+
+    // 플레이어의 속도는 시간이 지날수록 조금씩 줄어들어야한다. (틱당 25% 정도)
+    entity.transform.velocity.x -= entity.transform.velocity.x * 0.35;
+    if(entity.transform.velocity.x.isClose(0, 0.1, 0.1)) {
+      entity.transform.velocity.x = 0;
+    }
   }
 
   void sKeyMouseEvent() {
@@ -479,6 +485,12 @@ class SceneMario: Scene {
 	current_animation.update(dt);
       }
     }
+
+    // 플레이어의 속도가 0이 된다면 멈춘다.
+    // 단 점프가 아닐때
+    if(this.player.transform.velocity.x.isClose(0, 0.1, 0.1) && this.player.animation.current_animation == "Run") {
+      this.player.animation.current_animation = "Stand";
+    }
   }
 
   void sUserInput() {
@@ -497,9 +509,9 @@ class SceneMario: Scene {
       this.player.transform.velocity.x = this.ps.sm;
     }
 
-    if(!abs(this.player.transform.velocity.y).isClose(0.0)) {
+    if(!abs(this.player.transform.velocity.y).isClose(0.0, 0.1, 0.1)) {
       this.player.animation.current_animation = "Air";
-    } else if(abs(this.player.transform.velocity.x).isClose(0.0)) {
+    } else if(abs(this.player.transform.velocity.x).isClose(0.0, 0.1, 0.1)) {
       this.player.animation.current_animation = "Stand";
     } else {
       this.player.animation.current_animation = "Run";
@@ -631,7 +643,7 @@ class SceneMario: Scene {
       } else if(action.m_name == "RIGHT") {
 	this.player.input.right = true;
       } else if(action.m_name == "JUMP") {
-	if(this.player.transform.velocity.y.isClose(0)) {
+	if(this.player.transform.velocity.y.isClose(0, 0.1, 0.1)) {
 	  this.player.transform.velocity.y = -this.ps.sy;
 	}
       }

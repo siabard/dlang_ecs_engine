@@ -43,7 +43,7 @@ class SceneMario: Scene {
     this.level_path = level_path;
 
   }
-  
+
   override void scene_init() {
     File file = File(this.level_path, "r");
     scope(exit) {
@@ -59,7 +59,7 @@ class SceneMario: Scene {
       if(line.length > 0) {
 	string[] tokens = line.split;
 	if(tokens[0][0] == '#') {
-	  // comment  
+	  // comment
 	  // do nothing
 	} else if(tokens[0].toLower() == "player") {
 	  // GX GY width height speed_x speed_y speed_max gravity BulletAnimation
@@ -107,12 +107,12 @@ class SceneMario: Scene {
 	  this.bs.l = to!int(tokens[12]);
 	} else if(tokens[0].toLower() == "tile") {
 	  // Collision 이 있는 Entity
-	  // Tile Ground 0 0 
+	  // Tile Ground 0 0
 	  // Tile [Tile name] [Grid x] [Grid y]
-	  
+
 	  // Grid Y는 바닥(Game Height)에서 위로 올라간다.
 	  // 즉 GY = 0 은 GAME_HEIGHT - GY * TILE_SIZE 인 것
-	  // Grid X는 왼쪽에서 오른쪽으로 간다. 
+	  // Grid X는 왼쪽에서 오른쪽으로 간다.
 
 	  string animation_name = tokens[1];
 	  float grid_x = to!float(tokens[2]);
@@ -145,7 +145,7 @@ class SceneMario: Scene {
     entity.animation = new CAnimation();
     entity.animation.current_animation = animation_name;
     entity.animation.animations[animation_name] = this.game.am.get_animation(animation_name);
-    
+
     auto current_animation = entity.animation.animations[entity.animation.current_animation];
 
     // 좌표 설정 및 이동속도 (멈춰있음) 설정
@@ -187,7 +187,7 @@ class SceneMario: Scene {
     if(this.ps !is null) {
       auto entity = this.entities.addEntity("player");
       // Animation
-      
+
       CAnimation animation = new CAnimation();
       animation.current_animation = "Stand";
       animation.animations["Stand"] = this.game.am.animations["Stand"];
@@ -195,7 +195,7 @@ class SceneMario: Scene {
       animation.animations["Air"] = this.game.am.animations["Air"];
       auto current_animation = animation.animations[animation.current_animation];
 
-      // this.ps 에서의설정값으로Entity설정 
+      // this.ps 에서의설정값으로Entity설정
       CTransform transform = new CTransform(
 					    new Vec2(this.ps.x * 64 + current_animation.size.x / 2.0,
 						     this.game.wc.height - this.ps.y * 64 - current_animation.size.y /  2.0),
@@ -223,8 +223,8 @@ class SceneMario: Scene {
 
     if(this.es !is null) {
       auto entity = this.entities.addEntity("enemy");
-      
-      
+
+
       // this.es 에서의 설정을 가져옴
       float speed = get_random(cast(int)this.es.smin, cast(int)this.es.smax);
       float theta = get_random(0, 360) * 2.0 * PI / 180.0;
@@ -249,10 +249,10 @@ class SceneMario: Scene {
 				this.es.ot
 				);
 
-      
+
       CTransform transform = new CTransform(
-					    
-					    new Vec2(x_pos, y_pos), 
+
+					    new Vec2(x_pos, y_pos),
 					    new Vec2(speed * cos(theta),
 						     speed * sin(theta))
 					    );
@@ -276,14 +276,14 @@ class SceneMario: Scene {
   void spawn_special_bullets(Vec2 pos) {
     if(this.es !is null && this.bs !is null) {
       float speed = this.bs.s;
-      
+
       float unit_theta = 2.0 * PI / 10;
 
       // 한 10개 정도를 뿌려라..
       for(auto i = 0; i < 10; i++) {
 	auto entity = this.entities.addEntity("bullet");
-      
-      
+
+
 	// this.es 에서의 설정을 가져옴
 	CShape shape = new CShape(
 				  this.bs.sr * 2.0 / 4.0,
@@ -297,29 +297,29 @@ class SceneMario: Scene {
 				  this.bs.ot
 				  );
 
-      
+
 	CTransform transform = new CTransform(
-					      new Vec2(pos.x, pos.y), 
+					      new Vec2(pos.x, pos.y),
 					      (new Vec2(cos(unit_theta * i) * speed,
-							sin(unit_theta * i) * speed)) 
+							sin(unit_theta * i) * speed))
 					      );
 	CCollision collision = new CCollision(this.bs.cr / 4.0);
-      
+
 	CLifespan lifespan = new CLifespan(this.bs.l / 5.0);
 	entity.lifespan = lifespan;
 	entity.shape = shape;
 	entity.transform = transform;
 	entity.collision = collision;
       }
-      
+
     }
   }
 
   void spawn_bullet(Vec2 pos, Vec2 speed) {
     if(this.es !is null) {
       auto entity = this.entities.addEntity("bullet");
-      
-      
+
+
       // this.es 에서의 설정을 가져옴
       CShape shape = new CShape(
 				this.bs.sr * 2.0,
@@ -333,15 +333,15 @@ class SceneMario: Scene {
 				this.bs.ot
 				);
 
-      
+
       CTransform transform = new CTransform(
-					    
-					    new Vec2(pos.x, pos.y), 
+
+					    new Vec2(pos.x, pos.y),
 					    (new Vec2(speed.x,
 						      speed.y)) * this.bs.s
 					    );
       CCollision collision = new CCollision(this.bs.cr);
-      
+
       CLifespan lifespan = new CLifespan(this.bs.l);
       entity.lifespan = lifespan;
       entity.shape = shape;
@@ -362,7 +362,7 @@ class SceneMario: Scene {
 	Vec2 vec = new Vec2(
 			    cos(unit_theta * i) * vel,
 			    sin(unit_theta * i) * vel);
-	
+
 	auto part = this.entities.addEntity("enemy");
 	CShape shape = new CShape(
 				  this.es.sr / 2.0,
@@ -380,7 +380,7 @@ class SceneMario: Scene {
 	part.lifespan = lifespan;
 	part.shape = shape;
 	part.collision = collision;
-	
+
       }
     }
   }
@@ -390,11 +390,11 @@ class SceneMario: Scene {
     sUserInput();
     sLifespan(dt);
     sGravity(dt);
-    sCollision();
     sMovement(dt);
+    sCollision();
     sAnimation(dt);
     sEnemySpawner(dt);
-    this.entities.update();   
+    this.entities.update();
   }
 
 
@@ -408,7 +408,7 @@ class SceneMario: Scene {
   // systems
   void sMovement(float dt) {
     Rect world_rect = new Rect(0, 0, cast(int)this.game.wc.width, cast(int)this.game.wc.height);
-    
+
     foreach(entity; this.entities.getEntities()) {
       if(entity.transform !is null && entity.animation !is null) {
 	entity.transform.prev_pos.x = entity.transform.pos.x;
@@ -417,19 +417,18 @@ class SceneMario: Scene {
 	entity.transform.pos.y = entity.transform.pos.y + entity.transform.velocity.y * dt;
       }
     }
-    
-    auto entity = this.player;
 
+    auto entity = this.player;
     // 플레이어는 더 이상 움직이지 않아야함.
     Animation current_animation = entity.animation.animations[entity.animation.current_animation];
     Rect entity_rect = get_bound_rect(entity.transform.pos, current_animation.size.x, current_animation.size.y);
     if(!world_rect.contains(entity_rect)) {
-      entity.transform.pos.x = 
-	min(cast(float)this.game.wc.width - current_animation.size.x / 2.0 + 1.0, 
+      entity.transform.pos.x =
+	min(cast(float)this.game.wc.width - current_animation.size.x / 2.0 + 1.0,
 	    max(current_animation.size.x / 2.0 - 1.0, entity.transform.pos.x));
-      
-      entity.transform.pos.y = 
-	min(cast(float)this.game.wc.height - current_animation.size.y / 2.0 + 1.0, 
+
+      entity.transform.pos.y =
+	min(cast(float)this.game.wc.height - current_animation.size.y / 2.0 + 1.0,
 	    max(current_animation.size.y / 2.0 - 1.0, entity.transform.pos.y));
     }
   }
@@ -445,7 +444,7 @@ class SceneMario: Scene {
       this.player.input.left = key_is_activated(this.game.key_hold, SDLK_a);
       this.player.input.right = key_is_activated(this.game.key_hold, SDLK_d);
     */
-    
+
     // 마우스 클릭 처리
     if(this.game.mouse.lbutton_down == true) {
       Vec2 mouse_pos = new Vec2(this.game.mouse.x, this.game.mouse.y);
@@ -481,7 +480,7 @@ class SceneMario: Scene {
       }
     }
   }
-  
+
   void sUserInput() {
     // Player 이동 데이터 생성
     if(this.player !is null && this.player.input !is null && this.player.transform !is null && this.player.input.left) {
@@ -509,7 +508,7 @@ class SceneMario: Scene {
     Animation current_animation = this.player.animation.animations[this.player.animation.current_animation];
 
     if(this.player.transform.velocity.x < 0 && current_animation.flip_h == SDL_FLIP_NONE) {
-      // 왼쪽 바라보게 하기 
+      // 왼쪽 바라보게 하기
       current_animation.flip_h = SDL_FLIP_HORIZONTAL;
     } else if(this.player.transform.velocity.x > 0 && current_animation.flip_h != SDL_FLIP_NONE) {
       // 오른쪽 바라보게 하기
@@ -538,8 +537,8 @@ class SceneMario: Scene {
 	if(entity.lifespan !is null) {
 	  alpha = cast(ubyte)((cast(float)alpha) * (entity.lifespan.total - entity.lifespan.duration) / entity.lifespan.total);
 	}
-	
-	
+
+
 	// 위치 정하기
 	Vec2 pos = entity.transform.pos;
 
@@ -547,7 +546,12 @@ class SceneMario: Scene {
 	  if(entity.box !is null) {
 	    Rect local_bound = get_bound_rect(pos, entity.box.width, entity.box.height);
 	    SDL_SetRenderDrawColor(this.game.renderer, 255, 255, 255, 255);
-	    SDL_RenderDrawRect(this.game.renderer, new SDL_Rect(local_bound.x, local_bound.y, local_bound.w, local_bound.h));
+	    SDL_RenderDrawRect(this.game.renderer,
+			       new SDL_Rect(
+					    cast(int)local_bound.x,
+					    cast(int)local_bound.y,
+					    cast(int)local_bound.w,
+					    cast(int)local_bound.h));
 	  }
 	} else {
 	  // 노출할 애니메이션
@@ -555,9 +559,13 @@ class SceneMario: Scene {
 
 	  // 애니메이션의 폭
 	  Vec2 size = current_animation.size;
-	
+
 	  Rect local_bound = get_bound_rect(pos, size.x, size.y);
-	  SDL_Rect* tgt_rect = new SDL_Rect(local_bound.x, local_bound.y, local_bound.w, local_bound.h);
+	  SDL_Rect* tgt_rect = new SDL_Rect(
+					    cast(int)local_bound.x,
+					    cast(int)local_bound.y,
+					    cast(int)local_bound.w,
+					    cast(int)local_bound.h);
 
 	  entity.animation.animations[entity.animation.current_animation].render(this.game.renderer, tgt_rect);
 	}
@@ -577,18 +585,35 @@ class SceneMario: Scene {
   }
 
   void sCollision() {
+    writeln("current player x ", this.player.transform.pos.x);
     foreach(entity; this.entities.getEntities("tile")) {
       auto ovlp_dir = overlap_direction(this.player, entity);
 
       if(ovlp_dir != OVERLAP_DIRECTION.NONE) {
-	// 아래에 부딪히면..
-	if((ovlp_dir == OVERLAP_DIRECTION.DOWN && this.player.transform.velocity.y > 0)
-	   || (ovlp_dir == OVERLAP_DIRECTION.UP && this.player.transform.velocity.y < 0)) {
+	auto ovlp = entity_overlap_amount(this.player, entity);
+
+	if(ovlp_dir == OVERLAP_DIRECTION.DOWN && this.player.transform.velocity.y > 0) {
+	  // 아래에 부딪히면..
+	  // 부딪힌 y좌표만큼 위로 올린다.
 	  this.player.transform.velocity.y = 0;
-	} else if((ovlp_dir == OVERLAP_DIRECTION.LEFT && this.player.transform.velocity.x < 0) 
-		  || (ovlp_dir == OVERLAP_DIRECTION.RIGHT && this.player.transform.velocity.x > 0)){
+	  this.player.transform.pos.y -= ovlp.y;
+	} else  if (ovlp_dir == OVERLAP_DIRECTION.UP && this.player.transform.velocity.y < 0) {
+	  // 위에 부딪히면..
+	  // 부딪힌 y거리만큼 아래로 내린다.
+	   this.player.transform.velocity.y = 0;
+	   this.player.transform.pos.y += ovlp.y;
+	} else if(ovlp_dir == OVERLAP_DIRECTION.LEFT && this.player.transform.velocity.x < 0) {
+	  // 왼쪽으로 부딪히면..
+	  // 부딪힌 x거리만큼 오른쪽으로 이동한다.
 	  this.player.transform.velocity.x = 0;
+	  this.player.transform.pos.x += ovlp.x;
+	} else if (ovlp_dir == OVERLAP_DIRECTION.RIGHT && this.player.transform.velocity.x > 0) {
+	  // 오른쪽으로 부딪히면..
+	  // 부딪힌 x거리만큼 왼쪽으로 이동한다.
+	  this.player.transform.velocity.x = 0;
+	  this.player.transform.pos.x -= ovlp.x;
 	}
+
       }
     }
   }
@@ -616,17 +641,17 @@ class SceneMario: Scene {
       } else if(action.m_name == "COLLISION") {
 	this.collision_mode = !this.collision_mode;
       }
-    } 
+    }
   } // end of sAction
 
   unittest {
     import std.stdio;
 
     writeln("movement system");
-    
+
     Rect entity_rect = get_bound_rect(new Vec2(80, 80), 200, 25);
     Rect world_rect = new Rect(0, 0, 1280, 720);
-    
+
     assert(!world_rect.contains(entity_rect));
     assert("enemy" != "player");
     writeln(min(1280 - 100, max(100, 80)));

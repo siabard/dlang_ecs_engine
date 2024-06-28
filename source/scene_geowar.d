@@ -458,12 +458,22 @@ class SceneGeoWar: Scene {
 	
 
 	SDL_SetRenderDrawColor(this.game.renderer, shape.r, shape.g, shape.b, alpha);
-	SDL_RenderFillRect(this.game.renderer, new SDL_Rect(bound.x, bound.y, bound.w, bound.h));
+	SDL_RenderFillRect(this.game.renderer, 
+			   new SDL_Rect(
+					cast(int)bound.x, 
+					cast(int)bound.y, 
+					cast(int)bound.w, 
+					cast(int)bound.h));
 	
 	// 테두리 그리기
 	SDL_SetRenderDrawColor(this.game.renderer, shape.br, shape.bg, shape.bb, alpha);
 	SDL_RenderDrawPoint(this.game.renderer, cast(int)(entity.transform.pos.x), cast(int)(entity.transform.pos.y));
-	SDL_RenderDrawRect(this.game.renderer, new SDL_Rect(bound.x, bound.y, bound.w, bound.h));
+	SDL_RenderDrawRect(this.game.renderer, 
+			   new SDL_Rect(
+					cast(int)bound.x, 
+					cast(int)bound.y, 
+					cast(int)bound.w, 
+					cast(int)bound.h));
       }
     }
   }

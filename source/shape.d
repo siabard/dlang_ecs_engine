@@ -220,13 +220,22 @@ void render_circle(SDL_Renderer* renderer, Circle circ) {
 // pos 를 중점에 둔 가로 width, 세로 height 사각형
 Rect get_bound_rect(Vec2 pos, float width, float height) {
   return new Rect(
-		  cast(int)(pos.x - width / 2.0),
-		  cast(int)(pos.y - height / 2.0),
-		  cast(int)width,
-		  cast(int)height
+		  cast(float)(pos.x - width / 2.0),
+		  cast(float)(pos.y - height / 2.0),
+		  width,
+		  height
 		  );
 }
 
+
+unittest {
+  import std.stdio;
+  writeln("=== bouuund unittest ===");
+
+  Rect r1 = get_bound_rect(new Vec2(160, 638), 48, 48);
+  writeln("r1 = ", r1.x, ", ", r1.y, ", ", r1.w, ", ", r1.h);
+  writeln("=== bouuund unittest ===");
+}
 
 unittest {
   import std.stdio;

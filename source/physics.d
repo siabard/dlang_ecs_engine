@@ -59,7 +59,7 @@ Vec2 overlap_amount(Rect r1, Rect r2) {
 			abs(c1.y - c2.y));
 
   float ox = r1.w / 2 + r2.w / 2 - delta.x;
-  float oy = r2.h / 2 + r2.h / 2 - delta.y;
+  float oy = r1.h / 2 + r2.h / 2 - delta.y;
 
   return new Vec2(ox, oy);
 }
@@ -71,13 +71,11 @@ Vec2 entity_overlap_amount(Entity src, Entity opponent) {
     return ovlp;
   }
   Vec2 pos = src.transform.pos;
-  Vec2 src_size = new Vec2(src.box.width, src.box.height);
 
   Vec2 opp_pos = opponent.transform.pos;
-  Vec2 opp_size = new Vec2(opponent.box.width, opponent.box.height);
 
-  Rect src_rect = get_bound_rect(pos, src_size.x, src_size.y);
-  Rect opp_rect = get_bound_rect(opp_pos, opp_size.x, opp_size.y);
+  Rect src_rect = get_bound_rect(pos, src.box.width, src.box.height);
+  Rect opp_rect = get_bound_rect(opp_pos, opponent.box.width, opponent.box.height);
 
   ovlp = overlap_amount(src_rect, opp_rect);
 
@@ -109,34 +107,39 @@ OVERLAP_DIRECTION overlap_direction(Entity src, Entity opponent) {
   Vec2 ovlp_prev = entity_prev_overlap_amount(src, opponent);
   
   Vec2 pos = src.transform.pos;
-  Vec2 old_pos = src.transform.prev_pos;
 
   Vec2 opp_pos = opponent.transform.pos;
 
   // x축 y축 모두 겹쳐야 판단함
   if(ovlp.x > 0 && ovlp.y > 0) {
-    // ovlp 값을 보고 훨씬 큰 값을 가진쪽으로 한다.
-    if(ovlp.x > ovlp.y) {
-      // y축인데 이 때 위인지 아래인지 결정
-      // old_pos.y 가 pos.y 보다 크면 위가 부딪힌 것
-      if(old_pos.y > pos.y) {
+    // 그럼 이전에 어떤 상황이었는지가 중요하다.
+    if(ovlp_prev.x > 0 && ovlp_prev.y <= 0) {
+      // 이전에 x만 겹쳤었다면
+      // 이 상황은 y 축으로 충돌이 일어난 것이다.
+      
+      if(pos.y > opp_pos.y) { 
+	// src가 더 아래였으니 이는 src기준 위
 	return OVERLAP_DIRECTION.UP;
       } else {
+	// src가 더 위였으니 이는 src기준 아래
 	return OVERLAP_DIRECTION.DOWN;
       }
-    } else {
-      // x 축일 때 이 때 왼쪽인지 오른쪽인지 결정
-      // old_pos.x 가 pos.x 보다 크면 왼쪽이 부딪힌 것
-      if(old_pos.x > pos.x) {
+
+    } else if(ovlp_prev.x <= 0 && ovlp_prev.y > 0) {
+      // 반대로 y만 겹쳤었다면
+      // 이 상황은 x 축으로 충돌이 일어난 것이다.
+      if (pos.x > opp_pos.x) {
+	// src 가 더 오른쪽이었으니 이는 src기준 왼쪽
 	return OVERLAP_DIRECTION.LEFT;
       } else {
+	// src 가 더 왼쪽이었으니 이는 src기준 오른쪽 
 	return OVERLAP_DIRECTION.RIGHT;
       }
-    }
-  } else {
-    return OVERLAP_DIRECTION.NONE;
+    
+    } 
   }
-  
+  return OVERLAP_DIRECTION.NONE;
+    
 }
 
 unittest {

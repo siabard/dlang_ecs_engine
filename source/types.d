@@ -1,5 +1,5 @@
 class Rect {
-  int x, y, w, h;
+  float x, y, w, h;
 
   this() {
     this.x = 0;
@@ -8,7 +8,7 @@ class Rect {
     this.h = 0;
   }
 
-  this(int x, int y, int w, int h) {
+  this(float x, float y, float w, float h) {
 
     this.x = x;
     this.y = y;

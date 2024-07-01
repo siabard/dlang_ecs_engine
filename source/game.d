@@ -265,6 +265,7 @@ class Game {
 
   void update(float dt) {
     // 경과된 Tick을 계산한다.
+    writeln("dt => ", dt);
     this.scene[this.current_scene].update(dt);
     
   }

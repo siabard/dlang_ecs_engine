@@ -27,6 +27,8 @@ import scene;
 import action;
 import animation;
 
+import camera;
+
 class SceneMario: Scene {
 
   Entity player;
@@ -36,12 +38,17 @@ class SceneMario: Scene {
   BulletSpec bs;
 
   bool collision_mode = false;
+  Camera camera;
 
   this(Game game, string level_path) {
     super(game);
     this.entities = new EntityManager();
     this.level_path = level_path;
 
+    // 카메라 설정 추가 
+    this.camera = new Camera();
+    this.camera.width = this.game.wc.width;
+    this.camera.height = this.game.wc.height;
   }
 
   override void scene_init() {
@@ -540,48 +547,50 @@ class SceneMario: Scene {
   }
 
   void sRender() {
-    // Shape 이 있는 항목에 대한 그림 그리기 (사각형)
+    // Animation이 있고 Camera 영역에 있는 항목만 노출하기
     foreach(entity; this.entities.getEntities()) {
-
-      if(entity.transform !is null && entity.animation !is null) {
-	ubyte alpha = 0xff;
-	if(entity.lifespan !is null) {
-	  alpha = cast(ubyte)((cast(float)alpha) * (entity.lifespan.total - entity.lifespan.duration) / entity.lifespan.total);
-	}
-
-
-	// 위치 정하기
-	Vec2 pos = entity.transform.pos;
-
-	if(this.collision_mode) {
-	  if(entity.box !is null) {
-	    Rect local_bound = get_bound_rect(pos, entity.box.width, entity.box.height);
-	    SDL_SetRenderDrawColor(this.game.renderer, 255, 255, 255, 255);
-	    SDL_RenderDrawRect(this.game.renderer,
-			       new SDL_Rect(
-					    cast(int)local_bound.x,
-					    cast(int)local_bound.y,
-					    cast(int)local_bound.w,
-					    cast(int)local_bound.h));
+      if(this.camera.contains(entity)) {
+	if(entity.transform !is null && entity.animation !is null) {
+	  ubyte alpha = 0xff;
+	  if(entity.lifespan !is null) {
+	    alpha = cast(ubyte)((cast(float)alpha) * (entity.lifespan.total - entity.lifespan.duration) / entity.lifespan.total);
 	  }
-	} else {
-	  // 노출할 애니메이션
-	  auto current_animation = entity.animation.animations[entity.animation.current_animation];
 
-	  // 애니메이션의 폭
-	  Vec2 size = current_animation.size;
 
-	  Rect local_bound = get_bound_rect(pos, size.x, size.y);
-	  SDL_Rect* tgt_rect = new SDL_Rect(
-					    cast(int)local_bound.x,
-					    cast(int)local_bound.y,
-					    cast(int)local_bound.w,
-					    cast(int)local_bound.h);
+	  // 위치 정하기
+	  Vec2 pos = entity.transform.pos;
 
-	  entity.animation.animations[entity.animation.current_animation].render(this.game.renderer, tgt_rect);
+	  if(this.collision_mode) {
+	    if(entity.box !is null) {
+	      Rect local_bound = get_bound_rect(pos, entity.box.width, entity.box.height);
+	      SDL_SetRenderDrawColor(this.game.renderer, 255, 255, 255, 255);
+	      SDL_RenderDrawRect(this.game.renderer,
+				 new SDL_Rect(
+					      cast(int)local_bound.x,
+					      cast(int)local_bound.y,
+					      cast(int)local_bound.w,
+					      cast(int)local_bound.h));
+	    }
+	  } else {
+	    // 노출할 애니메이션
+	    auto current_animation = entity.animation.animations[entity.animation.current_animation];
+
+	    // 애니메이션의 폭
+	    Vec2 size = current_animation.size;
+
+	    Rect local_bound = get_bound_rect(pos, size.x, size.y);
+	    // 카메라 x, y 만큼 이동해야하기때문에 뺍니다.
+	    SDL_Rect* tgt_rect = new SDL_Rect(
+					      cast(int)(local_bound.x - this.camera.x),
+					      cast(int)(local_bound.y - this.camera.y),
+					      cast(int)local_bound.w,
+					      cast(int)local_bound.h);
+
+	    entity.animation.animations[entity.animation.current_animation].render(this.game.renderer, tgt_rect);
+	  }
 	}
       }
-    }
+    } // end of foreach(entity; this.entities.getEntities())
   }
 
   void sEnemySpawner(float dt) {

@@ -58,7 +58,6 @@ class SceneMario: Scene {
 	file.close();
       }
     }
-
     while(!file.eof()) {
       string line = strip(file.readln());
       // writeln("read line -> |", line, line.length);
@@ -125,6 +124,7 @@ class SceneMario: Scene {
 	  float grid_x = to!float(tokens[2]);
 	  float grid_y = to!float(tokens[3]);
 	  spawn_tile(animation_name, grid_x, grid_y);
+	  
 	} else if(tokens[0].toLower() == "dec") {
 	  // Collision 이 없는 Entity
 	  // 나머지는 tile 과 동일하다.
@@ -167,7 +167,10 @@ class SceneMario: Scene {
     // Collision 설정
     CBoundingBox box = new CBoundingBox(current_animation.size.x, current_animation.size.y);
     entity.box = box;
-
+    
+    // camera의 max위치 설정
+    this.camera.max_x = max(this.camera.max_x, x_pos + current_animation.size.x);
+    this.camera.max_y = max(this.camera.max_y, y_pos);
   }
 
   void spawn_bg(string animation_name, float grid_x, float grid_y) {
@@ -187,6 +190,10 @@ class SceneMario: Scene {
 
     CTransform transform = new CTransform(pos, new Vec2(0, 0));
     entity.transform = transform;
+
+    // camera의 max위치 설정
+    this.camera.max_x = max(this.camera.max_x, x_pos + current_animation.size.x);
+    this.camera.max_y = max(this.camera.max_y, y_pos);
 
   }
 
@@ -402,6 +409,7 @@ class SceneMario: Scene {
     sAnimation(dt);
     sEnemySpawner(dt);
     this.entities.update();
+    sCamera();
   }
 
 
@@ -526,12 +534,14 @@ class SceneMario: Scene {
 
     Animation current_animation = this.player.animation.animations[this.player.animation.current_animation];
 
-    if(this.player.transform.velocity.x < 0 && current_animation.flip_h == SDL_FLIP_NONE) {
+    if(this.player.input.left == true && current_animation.flip_h == SDL_FLIP_NONE) {
       // 왼쪽 바라보게 하기
       current_animation.flip_h = SDL_FLIP_HORIZONTAL;
-    } else if(this.player.transform.velocity.x > 0 && current_animation.flip_h != SDL_FLIP_NONE) {
+      this.player.animation.h_flip = true;
+    } else if(this.player.input.right == true && current_animation.flip_h != SDL_FLIP_NONE) {
       // 오른쪽 바라보게 하기
       current_animation.flip_h = SDL_FLIP_NONE;
+      this.player.animation.h_flip = false;
     }
   }
 
@@ -586,7 +596,10 @@ class SceneMario: Scene {
 					      cast(int)local_bound.w,
 					      cast(int)local_bound.h);
 
-	    entity.animation.animations[entity.animation.current_animation].render(this.game.renderer, tgt_rect);
+	    entity
+	      .animation
+	      .animations[entity.animation.current_animation].
+	      render(this.game.renderer, tgt_rect);
 	  }
 	}
       }
@@ -602,6 +615,13 @@ class SceneMario: Scene {
 	this.last_spwan_time += dt;
       }
     }
+  }
+
+  void sCamera() {
+    bool h_dir = this.player.animation.h_flip;
+    bool v_dir = this.player.transform.velocity.y < 0;
+
+    this.camera.follow_pos(this.player.transform.pos, v_dir, h_dir);
   }
 
   void sCollision() {

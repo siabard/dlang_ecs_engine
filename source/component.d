@@ -116,6 +116,7 @@ class CVertices {
 class CAnimation {
   string current_animation;
   Animation[string] animations;
+  bool h_flip = false;
 }
 
 // Bounding Box

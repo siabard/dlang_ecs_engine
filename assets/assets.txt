@@ -38,6 +38,6 @@ Animation Block      TexBlock    1    0
 Animation Flag       TexFlag     1    0
 Animation Pole       TexPole     1    0
 Animation PoleTop    TexPoleTop  1    0
-Font      Arial      assets/fonts/arial.ttf	16
-Font      Mario      assets/fonts/mario.ttf	16
+Font      Arial      assets/fonts/tech.ttf	16
+#Font      Mario      assets/fonts/mario.ttf	16
 Window 1280 720

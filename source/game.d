@@ -165,6 +165,7 @@ class Game {
   }
 
   void game_quit() {
+    this.am.destroy_asset();
     if(this.sdl_available) {
       if(this.renderer) {
 

@@ -25,7 +25,7 @@ class AssetManager {
   Mix_Chunk*[string] sounds;
   Mix_Music*[string] musics;
   Animation[string] animations;
-  ~this() {
+  void destroy_asset() {
     foreach(value; this.textures.byValue) {
       if(value !is null) {
 	SDL_DestroyTexture(value);
@@ -81,6 +81,8 @@ class AssetManager {
 
     if(font !is null) {
       this.fonts[name] = font;
+    } else {
+      writeln("font: ", name , " is null on path: ", "./" ~ path);
     }
   }
 

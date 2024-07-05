@@ -38,6 +38,8 @@ class SceneMario: Scene {
   BulletSpec bs;
 
   bool collision_mode = false;
+  bool grid_mode = false;
+
   Camera camera;
 
   this(Game game, string level_path) {
@@ -141,6 +143,7 @@ class SceneMario: Scene {
     register_action(SDLK_d, "RIGHT");
     register_action(SDLK_w, "JUMP");
     register_action(SDLK_c, "COLLISION");
+    register_action(SDLK_g, "GRID");
 
     spawn_player();
   }
@@ -409,20 +412,20 @@ class SceneMario: Scene {
     sAnimation(dt);
     sEnemySpawner(dt);
     this.entities.update();
-    sCamera();
+    sCamera(dt);
   }
 
 
   override void render() {
     // clear screen
-    SDL_SetRenderDrawColor(this.game.renderer, 0xaf, 0xff, 0xaf, 0xff);
+    SDL_SetRenderDrawColor(this.game.renderer, 0x70, 0x70, 0xff, 0xff);
     SDL_RenderClear(this.game.renderer);
     sRender();
   }
 
   // systems
   void sMovement(float dt) {
-    Rect world_rect = new Rect(0, 0, cast(int)this.game.wc.width, cast(int)this.game.wc.height);
+    Rect world_rect = new Rect(0, 0, cast(int)(this.camera.max_x + this.camera.width), cast(int)(this.camera.max_y + this.camera.height));
 
     foreach(entity; this.entities.getEntities()) {
       if(entity.transform !is null && entity.animation !is null) {
@@ -557,6 +560,58 @@ class SceneMario: Scene {
   }
 
   void sRender() {
+    if(this.grid_mode) {
+      // 배경 좌표 타일 그리기
+      SDL_SetRenderDrawColor(this.game.renderer, 255, 255, 255, 255);
+      for(auto y = this.camera.max_y; y >= 0; y -= 64) {
+	// 해당 y좌표가 camera 영역에 있으면 선을 그린다.
+	if(y >= this.camera.y - 64 && y <= this.camera.y + this.camera.height + 64) {	
+	
+	  auto screen_y = cast(int)(y - this.camera.y);
+	  SDL_RenderDrawLine(this.game.renderer, 0, screen_y, cast(int)this.camera.width, screen_y);
+	
+	}
+      }
+
+      for(auto x = 0; x <= this.camera.max_x; x += 64) {
+	if( x >= this.camera.x - 64 && x <= this.camera.x + this.camera.width + 64) {
+	  auto screen_x = cast(int)(x - this.camera.x);
+	  SDL_RenderDrawLine(this.game.renderer, screen_x, 0, screen_x, cast(int)this.camera.height);
+	
+	}
+      }
+
+      // 배경 좌표 타일에 글쓰기 
+      TTF_Font* font = this.game.am.fonts["Arial"];
+      for(auto y = this.camera.max_y; y >= 0; y -= 64) {
+	for(auto x = 0; x <= this.camera.max_x; x += 64) {
+	  if(y >= this.camera.y - 64 && y <= this.camera.y + this.camera.height + 64 &&
+	     x >= this.camera.x - 64 && x <= this.camera.x + this.camera.width + 64) {
+	    auto grid_x = cast(int)x / 64;
+	    auto grid_y = (cast(int)(this.camera.max_y) / 64) 
+	      - (cast(int)(y) / 64);
+	    auto grid_string =  "(" ~ to!string(grid_x) ~ ", " ~ to!string(grid_y) ~ ")";
+	    auto fg = SDL_Color(0xff, 0xff, 0xff, 0xff);
+	    auto bg = SDL_Color(0x00, 0x00, 0x00, 0x00);
+	    auto font_surface = TTF_RenderUTF8_Shaded(font,
+						      grid_string.toStringz, fg, bg);
+
+	    auto message = SDL_CreateTextureFromSurface(this.game.renderer, font_surface);
+	    SDL_RenderCopy(this.game.renderer, 
+			   message, 
+			   null, 
+			   new SDL_Rect(
+					cast(int)(x - this.camera.x) + 10, cast(int)(y - this.camera.y) - 25
+					,32, 32
+					));
+	    SDL_FreeSurface(font_surface);
+	  }
+	}
+	  
+      }
+
+    }
+
     // Animation이 있고 Camera 영역에 있는 항목만 노출하기
     foreach(entity; this.entities.getEntities()) {
       if(this.camera.contains(entity)) {
@@ -576,8 +631,8 @@ class SceneMario: Scene {
 	      SDL_SetRenderDrawColor(this.game.renderer, 255, 255, 255, 255);
 	      SDL_RenderDrawRect(this.game.renderer,
 				 new SDL_Rect(
-					      cast(int)local_bound.x,
-					      cast(int)local_bound.y,
+					      cast(int)(local_bound.x - this.camera.x),
+					      cast(int)(local_bound.y - this.camera.y),
 					      cast(int)local_bound.w,
 					      cast(int)local_bound.h));
 	    }
@@ -617,11 +672,12 @@ class SceneMario: Scene {
     }
   }
 
-  void sCamera() {
+  void sCamera(float dt) {
     bool h_dir = this.player.animation.h_flip;
     bool v_dir = this.player.transform.velocity.y < 0;
 
     this.camera.follow_pos(this.player.transform.pos, v_dir, h_dir);
+    this.camera.update(dt);
   }
 
   void sCollision() {
@@ -687,6 +743,8 @@ class SceneMario: Scene {
 	this.player.input.right = false;
       } else if(action.m_name == "COLLISION") {
 	this.collision_mode = !this.collision_mode;
+      } else if(action.m_name == "GRID") {
+	this.grid_mode = !this.grid_mode;
       }
     }
   } // end of sAction

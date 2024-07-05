@@ -34,6 +34,8 @@ class Camera {
     this.height = height;
     this.max_x = max_x;
     this.max_y = max_y;
+    this.target_x = x;
+    this.target_y = y;
   }
 
   Vec2 get_pos() {
@@ -88,8 +90,21 @@ class Camera {
       orig_x = max(0, min(this.max_x - this.width, (pos.x - this.width * 0.4)));
     }
     
-    this.x = orig_x;
-    this.y = orig_y;
+    this.target_x = orig_x;
+    this.target_y = orig_y;
+  }
+
+  void update(float dt) {
+    if(this.target_x == this.x && this.target_y == this.y) {
+      return;
+    }
+
+    auto delta_x = this.x - this.target_x;
+    auto delta_y = this.y - this.target_y;
+
+    // 매 틱마다 delta_x 를 1초 안에 획득한다
+    this.x = this.x - delta_x * dt;
+    this.y = this.y - delta_y * dt;
   }
 }
 

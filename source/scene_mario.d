@@ -593,8 +593,8 @@ class SceneMario: Scene {
 	    auto grid_string =  "(" ~ to!string(grid_x) ~ ", " ~ to!string(grid_y) ~ ")";
 	    auto fg = SDL_Color(0xff, 0xff, 0xff, 0xff);
 	    auto bg = SDL_Color(0x00, 0x00, 0x00, 0x00);
-	    auto font_surface = TTF_RenderUTF8_Shaded(font,
-						      grid_string.toStringz, fg, bg);
+	    auto font_surface = TTF_RenderUTF8_Blended(font,
+						      grid_string.toStringz, fg);
 
 	    auto message = SDL_CreateTextureFromSurface(this.game.renderer, font_surface);
 	    SDL_RenderCopy(this.game.renderer, 

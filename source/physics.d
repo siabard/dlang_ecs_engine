@@ -142,6 +142,79 @@ OVERLAP_DIRECTION overlap_direction(Entity src, Entity opponent) {
     
 }
 
+
+// Line intersection
+/*
+  a, b, c, d는 Vec2임
+  
+  r = b - a
+  s = d - c
+
+  2D cross product 를 아래와 같이 정의한다.
+
+  a .dot b = a.x * b.y - a.y * b.x
+
+
+  a->b, c->d 교점의 좌표를 a + t*r, c + u*s 라고 하면 이 때 t, u는 
+
+  t = ((c-a) .dot s) / (r .dot s)
+  u = ((a-c) .dot r) / (s .dot r)
+  이다.
+
+  이 때 s .dot r = -(r .dot s) 이므로
+
+  t = ((c-a) .dot s) / (r .dot s)
+  u = ((c-a) .dot r) / (r .dot s)
+
+
+  교점 p는 
+  p = a + t * r
+  p = c + u * r
+  이다.
+*/
+
+
+class Intersect {
+  bool result;
+  Vec2 pos;
+
+  this() {
+    this.result = false;
+    this.pos = new Vec2(0.0, 0.0);
+  }
+
+  this(bool result, Vec2 pos) {
+    this.result = result;
+    this.pos = new Vec2(pos.x, pos.y);
+  }
+}
+
+Intersect line_intersect(Vec2 a, Vec2 b, Vec2 c, Vec2 d) {
+  Vec2 r = b - a;
+  Vec2 s = d - c;
+
+  float rxs = r.dot(s);
+
+  Vec2 cma = c - a;
+  float t = cma.dot(s) / rxs;
+  float u = cma.dot(r) / rxs;
+
+  if(t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+    return new Intersect(true, a + (r*t));
+  } else {
+    return new Intersect(false, new Vec2(0, 0));
+  }
+}
+
+
+/*
+Line Intersect 를 검사하기위해서는 기준점에서 각 Vertex로 Ray를  쏘게되는데,
+이 때 해당 대상이 각도순으로 정렬되어있어야한다.
+
+Line Intersect 에서 true로 결정이 되었을 때에는 x값에 +1, -1을 한 좌표에도
+Ray 를 발사해봐서 해당 Ray가 충돌하는지 판단하는 것이 필요하다
+*/
+
 unittest {
   import std.stdio;
   import shape;

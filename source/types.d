@@ -149,6 +149,10 @@ class Vec2 {
     
   }
 
+  float dot(Vec2 rhs) {
+    return this.x * rhs.y - this.y * rhs.x;
+  }
+
   unittest {
 
     import std.stdio;

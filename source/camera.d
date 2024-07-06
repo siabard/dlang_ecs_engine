@@ -7,6 +7,8 @@ import animation;
 import component;
 import physics;
 
+import std.math;
+
 class Camera {
   float x = 0.0;
   float y = 0.0;
@@ -102,9 +104,17 @@ class Camera {
     auto delta_x = this.x - this.target_x;
     auto delta_y = this.y - this.target_y;
 
-    // 매 틱마다 delta_x 를 1초 안에 획득한다
+    // 매 틱마다 지정한 위치로 이동한다.
     this.x = this.x - delta_x * dt;
     this.y = this.y - delta_y * dt;
+
+    if(this.x.isClose(this.target_x, 0.5, 0.5)) {
+      //this.x = this.target_x;
+    }
+
+    if(this.y.isClose(this.target_y, 0.5, 0.5)) {
+      //this.y = this.target_y;
+    }
   }
 }
 

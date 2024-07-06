@@ -425,7 +425,9 @@ class SceneMario: Scene {
 
   // systems
   void sMovement(float dt) {
-    Rect world_rect = new Rect(0, 0, cast(int)(this.camera.max_x + this.camera.width), cast(int)(this.camera.max_y + this.camera.height));
+    Rect world_rect = new Rect(0, 0, 
+			       cast(int)(this.camera.max_x + this.camera.width),
+			       cast(int)(this.camera.max_y + this.camera.height));
 
     foreach(entity; this.entities.getEntities()) {
       if(entity.transform !is null && entity.animation !is null) {
@@ -452,7 +454,7 @@ class SceneMario: Scene {
 
     // 플레이어의 속도는 시간이 지날수록 조금씩 줄어들어야한다. (틱당 25% 정도)
     entity.transform.velocity.x -= entity.transform.velocity.x * 0.35;
-    if(entity.transform.velocity.x.isClose(0, 0.1, 0.1)) {
+    if(entity.transform.velocity.x.isClose(0, 0.9, 0.9)) {
       entity.transform.velocity.x = 0;
     }
   }
@@ -506,7 +508,7 @@ class SceneMario: Scene {
 
     // 플레이어의 속도가 0이 된다면 멈춘다.
     // 단 점프가 아닐때
-    if(this.player.transform.velocity.x.isClose(0, 0.1, 0.1) && this.player.animation.current_animation == "Run") {
+    if(this.player.transform.velocity.x.isClose(0, 0.5, 0.5) && this.player.animation.current_animation == "Run") {
       this.player.animation.current_animation = "Stand";
     }
   }
@@ -529,7 +531,7 @@ class SceneMario: Scene {
 
     if(!abs(this.player.transform.velocity.y).isClose(0.0, 0.1, 0.1)) {
       this.player.animation.current_animation = "Air";
-    } else if(abs(this.player.transform.velocity.x).isClose(0.0, 0.1, 0.1)) {
+    } else if(abs(this.player.transform.velocity.x).isClose(0.0, 0.5, 0.5)) {
       this.player.animation.current_animation = "Stand";
     } else {
       this.player.animation.current_animation = "Run";
@@ -560,6 +562,7 @@ class SceneMario: Scene {
   }
 
   void sRender() {
+    import text_util;
     if(this.grid_mode) {
       // 배경 좌표 타일 그리기
       SDL_SetRenderDrawColor(this.game.renderer, 255, 255, 255, 255);
@@ -592,19 +595,11 @@ class SceneMario: Scene {
 	      - (cast(int)(y) / 64);
 	    auto grid_string =  "(" ~ to!string(grid_x) ~ ", " ~ to!string(grid_y) ~ ")";
 	    auto fg = SDL_Color(0xff, 0xff, 0xff, 0xff);
-	    auto bg = SDL_Color(0x00, 0x00, 0x00, 0x00);
-	    auto font_surface = TTF_RenderUTF8_Blended(font,
-						      grid_string.toStringz, fg);
 
-	    auto message = SDL_CreateTextureFromSurface(this.game.renderer, font_surface);
-	    SDL_RenderCopy(this.game.renderer, 
-			   message, 
-			   null, 
-			   new SDL_Rect(
-					cast(int)(x - this.camera.x) + 10, cast(int)(y - this.camera.y) - 25
-					,32, 32
-					));
-	    SDL_FreeSurface(font_surface);
+	    put_utf_text(this.game.renderer, font, grid_string, 
+			 cast(int)(x - this.camera.x) + 10,
+			 cast(int)(y - this.camera.y) - 25,
+			 fg);
 	  }
 	}
 	  
@@ -728,7 +723,7 @@ class SceneMario: Scene {
       } else if(action.m_name == "RIGHT") {
 	this.player.input.right = true;
       } else if(action.m_name == "JUMP") {
-	if(this.player.transform.velocity.y.isClose(0, 0.1, 0.1)) {
+	if(this.player.transform.velocity.y.isClose(0, 0.9, 0.9)) {
 	  this.player.transform.velocity.y = -this.ps.sy;
 	}
       }

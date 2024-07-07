@@ -123,7 +123,8 @@ class Entity {
   CAnimation animation = null;
   CBoundingBox box = null;
   CGravity gravity = null;
-  
+  CDestructable destructable = null;
+
   this() {}
 
   this(string tag, uint entity_id) {

@@ -230,12 +230,15 @@ class Game {
       }
       
       if(event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
+
 	if( event.key.keysym.sym in this.scene[this.current_scene].action_map ) {
 	  string action_type = (event.type == SDL_KEYDOWN) ? "START" : "END" ;
-	  this.scene[this.current_scene].do_action( 
-						new Action( 
-							   this.scene[this.current_scene].action_map[event.key.keysym.sym], 
-							   action_type));
+	  this.scene[this.current_scene]
+	    .do_action( 
+		       new Action(
+				  this.scene[this.current_scene]
+				  .action_map[event.key.keysym.sym], 
+				  action_type));
 
 	}
       }
@@ -256,11 +259,10 @@ class Game {
 	 && this.key_pressed[SDLK_ESCAPE] == true) {
 	this.ended = true;
       }
-
       this.update(dt);
       this.render();
       this.last_time = this.current_time;
-      SDL_Delay(1000 / 30); // 30 FPS
+      SDL_Delay(1000 / 40); // 30 FPS
     }
   }
 

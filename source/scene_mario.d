@@ -144,6 +144,7 @@ class SceneMario: Scene {
     register_action(SDLK_w, "JUMP");
     register_action(SDLK_c, "COLLISION");
     register_action(SDLK_g, "GRID");
+    register_action(SDLK_SPACE, "SHOOT");
 
     spawn_player();
   }
@@ -154,7 +155,8 @@ class SceneMario: Scene {
     // 외양 설정
     entity.animation = new CAnimation();
     entity.animation.current_animation = animation_name;
-    entity.animation.animations[animation_name] = this.game.am.get_animation(animation_name);
+    entity.animation.animations[animation_name] =
+      this.game.am.get_animation(animation_name);
 
     auto current_animation = entity.animation.animations[entity.animation.current_animation];
 
@@ -171,9 +173,34 @@ class SceneMario: Scene {
     CBoundingBox box = new CBoundingBox(current_animation.size.x, current_animation.size.y);
     entity.box = box;
     
+    // 파괴 애니메이션 설정
+    if(animation_name == "Brick") {
+      CDestructable destructable = new CDestructable("Explosion");
+      entity.destructable = destructable;
+    }
+
     // camera의 max위치 설정
     this.camera.max_x = max(this.camera.max_x, x_pos + current_animation.size.x);
     this.camera.max_y = max(this.camera.max_y, y_pos);
+  }
+
+  void spawn_destruct_animation(Entity src) {
+    auto entity = this.entities.addEntity("effect");
+
+    // 외양 설정
+    string animation_name = src.destructable.animation_name;
+    entity.animation = new CAnimation();
+    entity.animation.current_animation = animation_name;
+    entity.animation.animations[animation_name] =
+      this.game.am.get_animation(animation_name);
+    entity.animation.animations[animation_name].repeatable = false;
+
+    // 좌표 설정 및 이동속도 (멈춰있음) 설정
+    CTransform transform = new CTransform(
+					  new Vec2(src.transform.pos.x,
+						   src.transform.pos.y), 
+					  new Vec2(0, 0));
+    entity.transform = transform;
   }
 
   void spawn_bg(string animation_name, float grid_x, float grid_y) {
@@ -290,115 +317,39 @@ class SceneMario: Scene {
 
   }
 
-  void spawn_special_bullets(Vec2 pos) {
-    if(this.es !is null && this.bs !is null) {
-      float speed = this.bs.s;
-
-      float unit_theta = 2.0 * PI / 10;
-
-      // 한 10개 정도를 뿌려라..
-      for(auto i = 0; i < 10; i++) {
-	auto entity = this.entities.addEntity("bullet");
-
-
-	// this.es 에서의 설정을 가져옴
-	CShape shape = new CShape(
-				  this.bs.sr * 2.0 / 4.0,
-				  this.bs.sr * 2.0 / 4.0,
-				  this.bs.fr,
-				  this.bs.fg,
-				  this.bs.fb,
-				  this.bs.or,
-				  this.bs.og,
-				  this.bs.ob,
-				  this.bs.ot
-				  );
-
-
-	CTransform transform = new CTransform(
-					      new Vec2(pos.x, pos.y),
-					      (new Vec2(cos(unit_theta * i) * speed,
-							sin(unit_theta * i) * speed))
-					      );
-	CCollision collision = new CCollision(this.bs.cr / 4.0);
-
-	CLifespan lifespan = new CLifespan(this.bs.l / 5.0);
-	entity.lifespan = lifespan;
-	entity.shape = shape;
-	entity.transform = transform;
-	entity.collision = collision;
-      }
-
-    }
-  }
-
-  void spawn_bullet(Vec2 pos, Vec2 speed) {
-    if(this.es !is null) {
+  void spawn_bullet() {
+    if(this.ps !is null && this.player !is null) {
       auto entity = this.entities.addEntity("bullet");
 
+      // Animation
+      CAnimation animation = new CAnimation();
+      animation.current_animation = this.ps.bullet;
+      animation.animations[this.ps.bullet] = this.game.am.animations[this.ps.bullet];
+      Animation current_animation = animation.animations[animation.current_animation];
 
-      // this.es 에서의 설정을 가져옴
-      CShape shape = new CShape(
-				this.bs.sr * 2.0,
-				this.bs.sr * 2.0,
-				this.bs.fr,
-				this.bs.fg,
-				this.bs.fb,
-				this.bs.or,
-				this.bs.og,
-				this.bs.ob,
-				this.bs.ot
-				);
+      float bullet_width = current_animation.size.x;
+      // 위치 및 이동
+      // 플레이어가 어디를 보느냐에 발사 위치 결정
+      float bullet_y = this.player.transform.pos.y;
+      float bullet_x  = (this.player.animation.h_flip) ?
+	this.player.transform.pos.x - bullet_width - 5 :
+	this.player.transform.pos.x + bullet_width + 5;
+      float bullet_speed = (this.player.animation.h_flip) ? -1000 : 1000;
+      CTransform transform =  new CTransform(
+					     new Vec2(bullet_x, bullet_y),
+					     new Vec2(bullet_speed, 0));
+      // collision area
+      CBoundingBox box = new CBoundingBox(
+					  current_animation.size.x,
+					  current_animation.size.y);
 
-
-      CTransform transform = new CTransform(
-
-					    new Vec2(pos.x, pos.y),
-					    (new Vec2(speed.x,
-						      speed.y)) * this.bs.s
-					    );
-      CCollision collision = new CCollision(this.bs.cr);
-
-      CLifespan lifespan = new CLifespan(this.bs.l);
-      entity.lifespan = lifespan;
-      entity.shape = shape;
+      // Lifespan
+      CLifespan lifespan = new CLifespan(500);
+      
       entity.transform = transform;
-      entity.collision = collision;
-    }
-  }
-
-  void spawn_small_enemies(Entity entity) {
-    if(entity.vertices !is null && entity.transform !is null && entity.is_alive) {
-      int vert = entity.vertices.vertices;
-
-      float unit_theta = 2.0 * PI / vert;
-      float vel = entity.transform.velocity.length();
-
-      for(auto i = 0; i < vert; i++) {
-	CLifespan lifespan = new CLifespan(30);
-	Vec2 vec = new Vec2(
-			    cos(unit_theta * i) * vel,
-			    sin(unit_theta * i) * vel);
-
-	auto part = this.entities.addEntity("enemy");
-	CShape shape = new CShape(
-				  this.es.sr / 2.0,
-				  this.es.sr  / 2.0,
-				  0,
-				  0,
-				  0,
-				  this.es.or,
-				  this.es.og,
-				  this.es.ob,
-				  this.es.ot
-				  );
-	CCollision collision = new CCollision(this.es.cr / 2.0);
-	part.transform = new CTransform(entity.transform.pos, vec);
-	part.lifespan = lifespan;
-	part.shape = shape;
-	part.collision = collision;
-
-      }
+      entity.box = box;
+      entity.lifespan = lifespan;
+      entity.animation = animation;
     }
   }
 
@@ -429,8 +380,9 @@ class SceneMario: Scene {
 			       cast(int)(this.camera.max_x + this.camera.width),
 			       cast(int)(this.camera.max_y + this.camera.height));
 
+
     foreach(entity; this.entities.getEntities()) {
-      if(entity.transform !is null && entity.animation !is null) {
+      if(entity.transform !is null) {
 	entity.transform.prev_pos.x = entity.transform.pos.x;
 	entity.transform.prev_pos.y = entity.transform.pos.y;
 	entity.transform.pos.x = entity.transform.pos.x + entity.transform.velocity.x * dt;
@@ -439,6 +391,7 @@ class SceneMario: Scene {
     }
 
     auto entity = this.player;
+
     // 플레이어는 더 이상 움직이지 않아야함.
     Animation current_animation = entity.animation.animations[entity.animation.current_animation];
     Rect entity_rect = get_bound_rect(entity.transform.pos, current_animation.size.x, current_animation.size.y);
@@ -471,25 +424,12 @@ class SceneMario: Scene {
       this.player.input.right = key_is_activated(this.game.key_hold, SDLK_d);
     */
 
-    // 마우스 클릭 처리
-    if(this.game.mouse.lbutton_down == true) {
-      Vec2 mouse_pos = new Vec2(this.game.mouse.x, this.game.mouse.y);
-      // 현재 플레이어 위치에서 mouse_pos 까지의 각도 계산
-      Vec2 difference = mouse_pos - this.player.transform.pos;
-      Vec2 speed = difference.normalize();
-
-      spawn_bullet(this.player.transform.pos, speed);
-    }
-
-    if(this.game.mouse.rbutton_down == true) {
-      spawn_special_bullets(this.player.transform.pos);
-    }
   }
 
   void sLifespan(float dt) {
     foreach(entity; this.entities.getEntities()) {
       if(entity.lifespan !is null) {
-	entity.lifespan.duration += dt;
+	entity.lifespan.duration += dt * 1000;
 
 	if(entity.lifespan.duration >= entity.lifespan.total) {
 	  entity.destroy();
@@ -503,6 +443,11 @@ class SceneMario: Scene {
       if(entity.animation !is null) {
 	Animation current_animation = entity.animation.animations[entity.animation.current_animation];
 	current_animation.update(dt);
+
+	// 애니메이션 종료시 파괴 처리
+	if(current_animation.animation_ended) {
+	  entity.destroy();
+	}
       }
     }
 
@@ -511,42 +456,51 @@ class SceneMario: Scene {
     if(this.player.transform.velocity.x.isClose(0, 0.5, 0.5) && this.player.animation.current_animation == "Run") {
       this.player.animation.current_animation = "Stand";
     }
+    
   }
 
   void sUserInput() {
     // Player 이동 데이터 생성
-    if(this.player !is null && this.player.input !is null && this.player.transform !is null && this.player.input.left) {
-      this.player.transform.velocity.x -= this.ps.sx;
-    }
+    if(this.player !is null && this.player.transform !is null) {
+      if(this.player.input !is null) {
+	if( this.player.input.left) {
+	  this.player.transform.velocity.x -= this.ps.sx;
+	}
 
-    if(this.player !is null && this.player.input !is null && this.player.transform !is null && this.player.input.right) {
-      this.player.transform.velocity.x += this.ps.sx;
-    }
+	if(this.player.input.right) {
+	  this.player.transform.velocity.x += this.ps.sx;
+	}
 
-    if(this.player.transform.velocity.x < -this.ps.sm) {
-      this.player.transform.velocity.x = -this.ps.sm;
-    } else if(this.player.transform.velocity.x > this.ps.sm) {
-      this.player.transform.velocity.x = this.ps.sm;
-    }
+	if(this.player.transform.velocity.x < -this.ps.sm) {
+	  this.player.transform.velocity.x = -this.ps.sm;
+	} else if(this.player.transform.velocity.x > this.ps.sm) {
+	  this.player.transform.velocity.x = this.ps.sm;
+	}
 
-    if(!abs(this.player.transform.velocity.y).isClose(0.0, 0.1, 0.1)) {
-      this.player.animation.current_animation = "Air";
-    } else if(abs(this.player.transform.velocity.x).isClose(0.0, 0.5, 0.5)) {
-      this.player.animation.current_animation = "Stand";
-    } else {
-      this.player.animation.current_animation = "Run";
-    }
+	if(this.player.input.jump) {
+	  this.player.transform.velocity.y = -this.ps.sy;
+	  this.player.input.jump = false;
+	}
 
-    Animation current_animation = this.player.animation.animations[this.player.animation.current_animation];
-
-    if(this.player.input.left == true && current_animation.flip_h == SDL_FLIP_NONE) {
-      // 왼쪽 바라보게 하기
-      current_animation.flip_h = SDL_FLIP_HORIZONTAL;
-      this.player.animation.h_flip = true;
-    } else if(this.player.input.right == true && current_animation.flip_h != SDL_FLIP_NONE) {
-      // 오른쪽 바라보게 하기
-      current_animation.flip_h = SDL_FLIP_NONE;
-      this.player.animation.h_flip = false;
+	// jump
+	if(!abs(this.player.transform.velocity.y).isClose(0.0, 0.1, 0.1)) {
+	  this.player.animation.current_animation = "Air";
+	} else if(abs(this.player.transform.velocity.x).isClose(0.0, 0.5, 0.5)) {
+	  this.player.animation.current_animation = "Stand";
+	} else {
+	  this.player.animation.current_animation = "Run";
+	}
+	
+	if(this.player.input.left == true 
+	   && this.player.animation.h_flip == false) {
+	  // 왼쪽 바라보게 하기
+	  this.player.animation.h_flip = true;
+	} else if(this.player.input.right == true 
+		  && this.player.animation.h_flip == true) {
+	  // 오른쪽 바라보게 하기
+	  this.player.animation.h_flip = false;
+	}
+      }
     }
   }
 
@@ -555,13 +509,13 @@ class SceneMario: Scene {
       if(entity.transform !is null && entity.gravity !is null) {
 	float y_acc = entity.transform.velocity.y;
 
-	y_acc += entity.gravity.gravity * 2;
+	y_acc += entity.gravity.gravity * dt * 75;
 	entity.transform.velocity.y = min(this.ps.sm, y_acc);
       }
     }
   }
 
-  void sRender() {
+  void draw_tiles() {
     import text_util;
     if(this.grid_mode) {
       // 배경 좌표 타일 그리기
@@ -586,6 +540,7 @@ class SceneMario: Scene {
 
       // 배경 좌표 타일에 글쓰기 
       TTF_Font* font = this.game.am.fonts["Arial"];
+      auto fg = SDL_Color(0xff, 0xff, 0xff, 0xff);
       for(auto y = this.camera.max_y; y >= 0; y -= 64) {
 	for(auto x = 0; x <= this.camera.max_x; x += 64) {
 	  if(y >= this.camera.y - 64 && y <= this.camera.y + this.camera.height + 64 &&
@@ -594,12 +549,12 @@ class SceneMario: Scene {
 	    auto grid_y = (cast(int)(this.camera.max_y) / 64) 
 	      - (cast(int)(y) / 64);
 	    auto grid_string =  "(" ~ to!string(grid_x) ~ ", " ~ to!string(grid_y) ~ ")";
-	    auto fg = SDL_Color(0xff, 0xff, 0xff, 0xff);
 
 	    put_utf_text(this.game.renderer, font, grid_string, 
 			 cast(int)(x - this.camera.x) + 10,
 			 cast(int)(y - this.camera.y) - 25,
 			 fg);
+			 
 	  }
 	}
 	  
@@ -607,19 +562,26 @@ class SceneMario: Scene {
 
     }
 
+  }
+
+  void sRender() {
+    // draw_tiles
+
+    this.draw_tiles();
     // Animation이 있고 Camera 영역에 있는 항목만 노출하기
     foreach(entity; this.entities.getEntities()) {
       if(this.camera.contains(entity)) {
 	if(entity.transform !is null && entity.animation !is null) {
 	  ubyte alpha = 0xff;
 	  if(entity.lifespan !is null) {
-	    alpha = cast(ubyte)((cast(float)alpha) * (entity.lifespan.total - entity.lifespan.duration) / entity.lifespan.total);
+	    alpha = cast(ubyte)((cast(float)alpha) * 
+				(entity.lifespan.total - entity.lifespan.duration) 
+				/ entity.lifespan.total);
 	  }
 
 
 	  // 위치 정하기
 	  Vec2 pos = entity.transform.pos;
-
 	  if(this.collision_mode) {
 	    if(entity.box !is null) {
 	      Rect local_bound = get_bound_rect(pos, entity.box.width, entity.box.height);
@@ -649,7 +611,7 @@ class SceneMario: Scene {
 	    entity
 	      .animation
 	      .animations[entity.animation.current_animation].
-	      render(this.game.renderer, tgt_rect);
+	      render(this.game.renderer, tgt_rect, entity.animation.h_flip);
 	  }
 	}
       }
@@ -676,38 +638,68 @@ class SceneMario: Scene {
   }
 
   void sCollision() {
-    foreach(entity; this.entities.getEntities("tile")) {
-      auto ovlp_dir = overlap_direction(this.player, entity);
+    foreach(entity; this.entities.getEntities()) {
+      if(entity.is_alive == true) {
+	foreach(opponent; this.entities.getEntities()) {
+	  if(opponent.is_alive == true) {
 
-      if(ovlp_dir != OVERLAP_DIRECTION.NONE) {
-	auto ovlp = entity_overlap_amount(this.player, entity);
+	    // 두 항목이 모두 CBoundingBox 를 갖고 있는 경우에 대해
+	    // 충돌 판정함
+	    if(entity.box !is null && opponent.box !is null) {
+	      auto ovlp_dir = overlap_direction(entity, opponent);
+	      if(ovlp_dir != OVERLAP_DIRECTION.NONE) {
 
-	if(ovlp_dir == OVERLAP_DIRECTION.DOWN && this.player.transform.velocity.y > 0) {
-	  // 아래에 부딪히면..
-	  // 부딪힌 y좌표만큼 위로 올린다.
-	  // 속도는 올라갈 수는 있으니 0보다는 작을 수 있다.
-	  this.player.transform.velocity.y = 
-	    min(this.player.transform.velocity.y, 0);
-	  this.player.transform.pos.y -= ovlp.y;
-	} else  if (ovlp_dir == OVERLAP_DIRECTION.UP && this.player.transform.velocity.y < 0) {
-	  // 위에 부딪히면..
-	  // 부딪힌 y거리만큼 아래로 내린다.
-	  // 속도는 떨어질 수는 있으니 0보다 클 수 있다.
-	   this.player.transform.velocity.y = 
-	     max(this.player.transform.velocity.y, 0);
-	   this.player.transform.pos.y += ovlp.y;
-	} else if(ovlp_dir == OVERLAP_DIRECTION.LEFT && this.player.transform.velocity.x < 0) {
-	  // 왼쪽으로 부딪히면..
-	  // 부딪힌 x거리만큼 오른쪽으로 이동한다.
-	  this.player.transform.velocity.x = 0;
-	  this.player.transform.pos.x += ovlp.x;
-	} else if (ovlp_dir == OVERLAP_DIRECTION.RIGHT && this.player.transform.velocity.x > 0) {
-	  // 오른쪽으로 부딪히면..
-	  // 부딪힌 x거리만큼 왼쪽으로 이동한다.
-	  this.player.transform.velocity.x = 0;
-	  this.player.transform.pos.x -= ovlp.x;
+		// Overlap 이 일어날 때 판정
+		// player - tile
+		// bullet - tile
+
+		if((entity.tag == "player" && opponent.tag == "tile") ||
+		   (entity.tag == "bullet" && opponent.tag == "tile")) {
+		  if(entity.tag == "bullet" && opponent.tag == "tile") {
+		    entity.destroy();
+
+		    if(opponent.destructable !is null) {
+		      spawn_destruct_animation(opponent);
+		      opponent.destroy();
+		    }
+		  }
+
+		  
+		  auto ovlp = entity_overlap_amount(entity, opponent);
+		  if(ovlp_dir == OVERLAP_DIRECTION.DOWN && 
+		     entity.transform.velocity.y > 0) {
+		    // 아래에 부딪히면..
+		    // 부딪힌 y좌표만큼 위로 올린다.
+		    // 속도는 올라갈 수는 있으니 0보다는 작을 수 있다.	
+		    entity.transform.velocity.y = 
+		      min(entity.transform.velocity.y, 0);
+		    entity.transform.pos.y -= ovlp.y;
+		  } else  if (ovlp_dir == OVERLAP_DIRECTION.UP &&
+			      entity.transform.velocity.y < 0) {
+		    // 위에 부딪히면..
+		    // 부딪힌 y거리만큼 아래로 내린다.
+		    // 속도는 떨어질 수는 있으니 0보다 클 수 있다.
+		    entity.transform.velocity.y = 
+		      max(entity.transform.velocity.y, 0);
+		    entity.transform.pos.y += ovlp.y;
+		  } else if(ovlp_dir == OVERLAP_DIRECTION.LEFT &&
+			    entity.transform.velocity.x < 0) {
+		    // 왼쪽으로 부딪히면..
+		    // 부딪힌 x거리만큼 오른쪽으로 이동한다.
+		    entity.transform.velocity.x = 0;
+		    entity.transform.pos.x += ovlp.x;
+		  } else if (ovlp_dir == OVERLAP_DIRECTION.RIGHT &&
+			     entity.transform.velocity.x > 0) {
+		    // 오른쪽으로 부딪히면..
+		    // 부딪힌 x거리만큼 왼쪽으로 이동한다.
+		    entity.transform.velocity.x = 0;
+		    entity.transform.pos.x -= ovlp.x;
+		  }
+		}
+	      }
+	    }
+	  }
 	}
-
       }
     }
   }
@@ -723,8 +715,10 @@ class SceneMario: Scene {
       } else if(action.m_name == "RIGHT") {
 	this.player.input.right = true;
       } else if(action.m_name == "JUMP") {
-	if(this.player.transform.velocity.y.isClose(0, 0.9, 0.9)) {
-	  this.player.transform.velocity.y = -this.ps.sy;
+	if(this.player.transform.velocity.y.isClose(0, 0.5, 0.5)) {
+	  this.player.input.jump = true;
+	} else {
+	  this.player.input.jump = false;
 	}
       }
     } else if (action.m_type == "END") {
@@ -740,6 +734,10 @@ class SceneMario: Scene {
 	this.collision_mode = !this.collision_mode;
       } else if(action.m_name == "GRID") {
 	this.grid_mode = !this.grid_mode;
+      } else if(action.m_name == "JUMP") {
+	this.player.input.jump = false;
+      } else if(action.m_name == "SHOOT") {
+	spawn_bullet();
       }
     }
   } // end of sAction

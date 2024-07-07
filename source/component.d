@@ -2,15 +2,30 @@ module component;
 
 import types;
 import animation;
+import std.stdio;
 
 class CTransform {
-  Vec2 pos = new Vec2(0, 0);
-  Vec2 prev_pos = new Vec2(0, 0);
-  Vec2 velocity = new Vec2(0, 0);
+  Vec2 pos;
+  Vec2 prev_pos;
+  Vec2 velocity;
+
+  this() {
+    this.pos = new Vec2(0, 0);
+    this.prev_pos = new Vec2(0, 0);
+    this.velocity = new Vec2(0, 0);
+  }
+
 
   this(const Vec2 p, const Vec2 v) {
     this.pos = new Vec2(p.x, p.y);
+    this.prev_pos = new Vec2(0, 0);
     this.velocity = new Vec2(v.x, v.y);
+  }
+
+  void info_write() {
+    writeln(" ppos pointer ", &prev_pos);
+    writeln(" prev_pos ", prev_pos.x, " , " , prev_pos.y);
+    writeln(" pos ", pos.x, " , " , pos.y);
   }
 }
 
@@ -60,7 +75,7 @@ class CInput {
   bool down = false;
   bool right = false;
   bool left = false;
-
+  bool jump = false;
   bool shoot = false;
 }
 
@@ -133,4 +148,12 @@ class CBoundingBox {
 
 class CGravity {
   float gravity = 0.0;
+}
+
+class CDestructable {
+  string animation_name;
+
+  this(string animation_name) {
+    this.animation_name = animation_name;
+  }
 }

@@ -64,6 +64,8 @@ class Scene {
   void register_action(int action_key, string action_name) {
     this.action_map[action_key] = action_name;
   }
+
+  void scene_quit() {}
   // systems
 
 

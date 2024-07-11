@@ -25,7 +25,6 @@ import scene;
 import action;
 
 class SceneGeoWar: Scene {
-  EntityManager entities;
   Entity player;
   string level_path;
 

@@ -10,6 +10,7 @@ import constants;
 import scene;
 import scene_geowar;
 import scene_mario;
+import scene_surface;
 
 import config;
 
@@ -93,7 +94,8 @@ class Game {
       load_asset(asset_path);
 
       this.current_scene = "mario";
-      this.scene[this.current_scene] = new SceneMario(this, "./assets/level1.txt");
+      //this.scene[this.current_scene] = new SceneMario(this, "./assets/level1.txt");
+      this.scene[this.current_scene] = new SceneSurface(this, "./assets/level1.txt");
       this.scene[this.current_scene].scene_init();
     }
   }
@@ -165,6 +167,11 @@ class Game {
   }
 
   void game_quit() {
+    // Scene 정리하기
+    foreach(ref aScene; this.scene) {
+      aScene.scene_quit();
+    }
+
     this.am.destroy_asset();
     if(this.sdl_available) {
       if(this.renderer) {
